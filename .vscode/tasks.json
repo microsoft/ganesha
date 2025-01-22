@@ -23,6 +23,17 @@
 			"options": {
 				"cwd": "${workspaceFolder}"
 			}
+		},
+		{
+			// https://github.com/Azure/Azurite/issues/607
+			"type": "process",
+			"label": "azurite auto start",
+			"command": "${command:azurite.start}",
+			"problemMatcher": [],
+			"isBackground": true,
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
 		}
 	]
 }
