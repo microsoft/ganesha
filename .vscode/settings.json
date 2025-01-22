@@ -12,5 +12,6 @@
         "remote": {
             "baseUrl": ""
         }
-    }
+    },
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
