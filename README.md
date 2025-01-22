@@ -96,7 +96,7 @@ Navigate to the `http` app folder and create a file in that folder named _local.
 
 ## Source Code
 
-The source code for the GET and POST functions is found in the [`Function.java`](./http/src/main/java/com/contoso/Function.java) file. The function is identified as an Azure Function by use of the `@FunctionName` and `@HttpTrigger` annotations from the `azure.functions.java.library.version` library in the POM.
+The source code for the GET and POST functions is found in the [`Function.java`](./http/src/main/java/com/ganesha/Function.java) file. The function is identified as an Azure Function by use of the `@FunctionName` and `@HttpTrigger` annotations from the `azure.functions.java.library.version` library in the POM.
 
 This code defines an HTTP GET triggered function:  
 

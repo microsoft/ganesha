@@ -4,8 +4,8 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.contoso</groupId>
-    <artifactId>contoso-functions</artifactId>
+    <groupId>com.ganesha</groupId>
+    <artifactId>ganesha-functions</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -17,7 +17,7 @@
         <azure.functions.maven.plugin.version>1.36.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.1.0</azure.functions.java.library.version>
         <durabletask.azure.functions>1.0.0</durabletask.azure.functions>
-        <functionAppName>contoso-functions</functionAppName>
+        <functionAppName>ganesha-functions</functionAppName>
     </properties>
 
     <dependencies>

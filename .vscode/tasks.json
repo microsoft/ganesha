@@ -8,7 +8,7 @@
 			"problemMatcher": "$func-java-watch",
 			"isBackground": true,
 			"options": {
-				"cwd": "${workspaceFolder}/target/azure-functions/contoso-functions"
+				"cwd": "${workspaceFolder}/target/azure-functions/ganesha-functions"
 			},
 			"dependsOn": "package (functions)"
 		},

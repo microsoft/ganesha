@@ -1,4 +1,4 @@
-package com.contoso;
+package com.ganesha;
 
 import com.microsoft.azure.functions.*;
 
