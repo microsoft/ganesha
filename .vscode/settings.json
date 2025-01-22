@@ -1,0 +1,17 @@
+{
+    "azureFunctions.javaBuildTool": "maven",
+    "azureFunctions.deploySubpath": "target/azure-functions/ganesha-functions",
+    "azureFunctions.projectLanguage": "Java",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "package (functions)",
+    "rest-client.environmentVariables": {
+        "dev": {
+            "baseUrl": "http://localhost:7071"
+        },
+        "remote": {
+            "baseUrl": ""
+        }
+    },
+    "java.configuration.updateBuildConfiguration": "interactive"
+}
