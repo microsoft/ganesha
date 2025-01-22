@@ -8,7 +8,7 @@
 			"problemMatcher": "$func-java-watch",
 			"isBackground": true,
 			"options": {
-				"cwd": "${workspaceFolder}/http/target/azure-functions/contoso-functions"
+				"cwd": "${workspaceFolder}/target/azure-functions/contoso-functions"
 			},
 			"dependsOn": "package (functions)"
 		},
@@ -21,7 +21,7 @@
 				"isDefault": true
 			},
 			"options": {
-				"cwd": "${workspaceFolder}/http"
+				"cwd": "${workspaceFolder}"
 			}
 		}
 	]
