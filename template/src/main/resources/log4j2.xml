@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="com.microsoft.applicationinsights.log4j.v2">
+    <Appenders>
+        <RollingFile name="file" fileName="logs/servicename.log"
+                     filePattern="logs/servicename-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1.}:%M():%L - %msg%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1.}:%M():%L - %msg%n}{FATAL=white, ERROR=red, WARN=Cyan, INFO=grey, DEBUG=green}"/>
+        </Console>
+        <ApplicationInsightsAppender name="aiAppender"> </ApplicationInsightsAppender>
+    </Appenders>
+
+    <Loggers>
+        <Root level="${env:LOG4J_LEVEL:-info}">
+            <AppenderRef ref="file"/>
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="aiAppender"/>
+        </Root>
+        <Logger name="com" level="info"/>
+    </Loggers>
+</Configuration>
