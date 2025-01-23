@@ -1,0 +1,213 @@
+server:
+  port: 8952
+
+StargateAccessNavTokenEndpoint:
+StargateAccessNavTokenRequest:
+
+prop:
+  include-inactive-patients: Y
+  include-expired-prescriptions: Y
+  include-discontinued-prescriptions: Y
+  include-refillable-prescriptions: Y
+  include-renewable-prescriptions: Y
+  include-open-order-prescriptions: Y
+  include-duplicate-gpi: Y
+
+
+---
+ 
+spring:
+  config:
+    activate:
+      on-profile:
+      - test
+  sleuth: 
+    enabled: true
+  application:
+      name:
+  cloud: 
+    azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            credential:
+              client-id: CLIENTID
+              client-secret: CLIENTSECRET
+            endpoint: https://acq-dvop-us-c-keyvault.vault.azure.net/
+            profile:
+              tenant-id: TENANTID
+    config:
+      profile: test
+    kubernetes:
+      discovery:
+        enabled: true
+        
+name: test
+environment: test
+
+azure:
+  application-insights:
+    instrumentation-key: 
+     
+---
+
+spring:
+  config:
+    activate:
+      on-profile:
+      - pcqtest
+  sleuth: 
+    enabled: true
+  application:
+      name:
+  cloud:
+    azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            credential:
+              client-id: CLIENTID
+              client-secret: CLIENTSECRET
+            endpoint: https://acq-test-us-c-keyvault.vault.azure.net/
+            profile:
+              tenant-id: TENANTID 
+    config:
+      profile: pcqtest
+    kubernetes:
+      discovery:
+        enabled: true
+        
+name: pcqtest
+environment: pcqtest
+
+azure:
+  application-insights:
+    instrumentation-key: 
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile:
+      - stage
+  application:
+      name:
+  cloud:
+   azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            credential:
+              client-id: CLIENTID
+              client-secret: CLIENTSECRET
+            endpoint: https://acq-stge-us-c-keyvault.vault.azure.net/
+            profile:
+              tenant-id: TENANTID
+   config:
+      profile: stage
+   kubernetes: 
+      discovery:
+        enabled: true
+name: stage
+environment: stage
+
+azure:
+  application-insights:
+    instrumentation-key: 
+     
+---
+
+spring:
+  config:
+    activate:
+      on-profile:
+      - perf
+  application:
+      name: 
+  cloud:
+   azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            credential:
+              client-id: CLIENTID
+              client-secret: CLIENTSECRET
+            endpoint: https://acq-perf-us-c-keyvault.vault.azure.net/
+            profile:
+              tenant-id: TENANTID
+   config:
+      profile: perf
+   kubernetes: 
+      discovery:
+        enabled: true
+name: perf
+environment: perf
+
+azure:
+  application-insights:
+    instrumentation-key: 
+     
+---
+
+spring:
+  config:
+    activate:
+      on-profile:
+      - trng
+  application:
+      name: 
+  cloud: 
+   azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            credential:
+              client-id: CLIENTID
+              client-secret: CLIENTSECRET
+            endpoint: https://acq-tkch-us-c-keyvault.vault.azure.net/
+            profile:
+              tenant-id: TENANTID
+   config:
+      profile: trng
+   kubernetes: 
+      discovery:
+        enabled: true
+name: trng
+environment: trng
+
+azure:
+  application-insights:
+    instrumentation-key: 
+
+---
+#Please review while doing final prod configuration
+spring:
+  config:
+    activate:
+      on-profile:
+      - prod
+  application:
+      name: 
+  cloud: 
+   azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            credential:
+              client-id: CLIENTID
+              client-secret: CLIENTSECRET
+            endpoint: https://acq-prod-us-c-keyvault.vault.azure.net/
+            profile:
+              tenant-id: TENANTID
+   config:
+      profile: prod
+   kubernetes: 
+      discovery:
+        enabled: true
+name: prod
+environment: prod
+
+azure:
+  application-insights:
+    instrumentation-key: 
