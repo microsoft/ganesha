@@ -7,149 +7,183 @@ param environmentName string
 
 @minLength(1)
 @description('Primary location for all resources')
-@allowed(['australiaeast', 'eastasia', 'eastus', 'eastus2', 'northeurope', 'southcentralus', 'southeastasia', 'swedencentral', 'uksouth', 'westus2', 'eastus2euap'])
-@metadata({
-  azd: {
-    type: 'location'
-  }
-})
 param location string
 
-param skipVnet bool = false
-param apiServiceName string = ''
-param apiUserAssignedIdentityName string = ''
-param applicationInsightsName string = ''
-param appServicePlanName string = ''
-param logAnalyticsName string = ''
-param resourceGroupName string = ''
-param storageAccountName string = ''
-param vNetName string = ''
+@description('Id of the user or app to assign application roles')
+param principalId string = ''
+
+param serviceName string = 'api'
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
-var tags = { 'azd-env-name': environmentName }
+var storageAccountName = '${abbrs.storageStorageAccounts}${resourceToken}'
+var cognitiveAccountName = '${abbrs.cognitiveServicesAccounts}${resourceToken}'
 
+var tags = {
+  'azd-env-name': environmentName
+}
 
-// Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
+  name: '${abbrs.resourcesResourceGroups}${environmentName}'
   location: location
   tags: tags
 }
 
-// User assigned managed identity to be used by the Function App to reach storage and service bus
-module apiUserAssignedIdentity './core/identity/userAssignedIdentity.bicep' = {
-  name: 'apiUserAssignedIdentity'
-  scope: rg
+module storage 'modules/storage/storage.bicep' = {
+  name: '${deployment().name}--storage'
+  scope: resourceGroup(rg.name)
   params: {
     location: location
     tags: tags
-    identityName: !empty(apiUserAssignedIdentityName) ? apiUserAssignedIdentityName : '${abbrs.managedIdentityUserAssignedIdentities}api-${resourceToken}'
+    storageAccountName: storageAccountName
   }
 }
 
-// The application backend
-module api './app/api.bicep' = {
-  name: 'api'
-  scope: rg
+module managedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = {
+  name: 'user-assigned-identity'
+  scope: resourceGroup(rg.name)
   params: {
-    name: !empty(apiServiceName) ? apiServiceName : '${abbrs.webSitesFunctions}api-${resourceToken}'
+    name: 'managed-identity-${resourceToken}'
     location: location
     tags: tags
-    applicationInsightsName: monitoring.outputs.applicationInsightsName
-    appServicePlanId: appServicePlan.outputs.id
-    runtimeName: 'java'
-    runtimeVersion: '17'
-    storageAccountName: storage.outputs.name
-    identityId: apiUserAssignedIdentity.outputs.identityId
-    identityClientId: apiUserAssignedIdentity.outputs.identityClientId
-    appSettings: {
+  }
+}
+
+module cognitive 'modules/cognitive/cognitive.bicep' = {
+  name: '${deployment().name}--cog'
+  scope: resourceGroup(rg.name)
+  params: {
+    location: location
+    tags: tags
+    accountName: cognitiveAccountName
+    deployments: [
+	  {
+		name: 'chat'
+		model: {
+		  format: 'OpenAI'
+		  name: 'gpt-4o'
+		  version: '2024-08-06'
+		}
+		capacity: 30
+	  }
+	  {
+		name: 'embedding'
+		model: {
+		  format: 'OpenAI'
+		  name: 'text-embedding-ada-002'
+		  version: '2'
+		}
+		capacity: 30
+	  }
+	]
+  }
+}
+
+// This is obsolete and will be removed in a future release
+module containerRegistry 'br/public:avm/res/container-registry/registry:0.5.1' = {
+  name: 'container-registry'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: 'containerreg${resourceToken}'
+    location: location
+    tags: tags
+    acrAdminUserEnabled: false
+    anonymousPullEnabled: true
+    publicNetworkAccess: 'Enabled'
+    acrSku: 'Standard'
+  }
+}
+
+var containerRegistryRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '8311e382-0749-4cb8-b61a-304f252e45ec'
+) // AcrPush built-in role
+
+module registryUserAssignment 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = if (!empty(principalId)) {
+  name: 'container-registry-role-assignment-push-user'
+  scope: resourceGroup(rg.name)
+  params: {
+    principalId: principalId
+    resourceId: containerRegistry.outputs.resourceId
+    roleDefinitionId: containerRegistryRole
+  }
+}
+
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.7.0' = {
+  name: 'log-analytics-workspace'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: 'log-analytics-${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.8.0' = {
+  name: 'container-apps-env'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: 'container-env-${resourceToken}'
+    location: location
+    tags: tags
+    logAnalyticsWorkspaceResourceId: logAnalyticsWorkspace.outputs.resourceId
+    zoneRedundant: false
+  }
+}
+
+module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
+  name: 'container-apps-app'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: 'container-app-${resourceToken}'
+    environmentResourceId: containerAppsEnvironment.outputs.resourceId
+    location: location
+    tags: union(tags, { 'azd-service-name': serviceName })
+    ingressTargetPort: 8080
+    ingressExternal: true
+    ingressTransport: 'auto'
+    stickySessionsAffinity: 'sticky'
+    scaleMaxReplicas: 1
+    scaleMinReplicas: 1
+    corsPolicy: {
+      allowCredentials: true
+      allowedOrigins: [
+        '*'
+      ]
     }
-    virtualNetworkSubnetId: skipVnet ? '' : serviceVirtualNetwork.outputs.appSubnetID
-  }
-}
-
-// Backing storage for Azure functions api
-module storage './core/storage/storage-account.bicep' = {
-  name: 'storage'
-  scope: rg
-  params: {
-    name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${resourceToken}'
-    location: location
-    tags: tags
-    containers: [{name: 'deploymentpackage'}]
-    publicNetworkAccess: skipVnet ? 'Enabled' : 'Disabled'
-    networkAcls: skipVnet ? {} : {
-      defaultAction: 'Deny'
+    managedIdentities: {
+      systemAssigned: false
+      userAssignedResourceIds: [
+        managedIdentity.outputs.resourceId
+      ]
     }
-  }
-}
-
-var storageRoleDefinitionId  = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' //Storage Blob Data Owner role
-
-// Allow access from api to storage account using a managed identity
-module storageRoleAssignmentApi 'app/storage-Access.bicep' = {
-  name: 'storageRoleAssignmentApi'
-  scope: rg
-  params: {
-    storageAccountName: storage.outputs.name
-    roleDefinitionID: storageRoleDefinitionId
-    principalID: apiUserAssignedIdentity.outputs.identityPrincipalId
-  }
-}
-
-module appServicePlan './core/host/appserviceplan.bicep' = {
-  name: 'appserviceplan'
-  scope: rg
-  params: {
-    name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceToken}'
-    location: location
-    tags: tags
-    sku: {
-      name: 'FC1'
-      tier: 'FlexConsumption'
+    secrets: {
+      secureList: [
+        {
+          name: 'user-assigned-managed-identity-client-id'
+          value: managedIdentity.outputs.clientId
+        }
+      ]
     }
+    containers: [
+      {
+        image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        name: 'web-front-end'
+        resources: {
+          cpu: '0.25'
+          memory: '.5Gi'
+        }
+        env: [
+          {
+            name: 'AZURE_CLIENT_ID'
+            secretRef: 'user-assigned-managed-identity-client-id'
+          }
+        ]
+      }
+    ]    
   }
 }
 
-// Virtual Network & private endpoint
-module serviceVirtualNetwork 'app/vnet.bicep' =  if (!skipVnet) {
-  name: 'serviceVirtualNetwork'
-  scope: rg
-  params: {
-    location: location
-    tags: tags
-    vNetName: !empty(vNetName) ? vNetName : '${abbrs.networkVirtualNetworks}${resourceToken}'
-  }
-}
-
-module storagePrivateEndpoint 'app/storage-PrivateEndpoint.bicep' = if (!skipVnet) {
-  name: 'servicePrivateEndpoint'
-  scope: rg
-  params: {
-    location: location
-    tags: tags
-    virtualNetworkName: !empty(vNetName) ? vNetName : '${abbrs.networkVirtualNetworks}${resourceToken}'
-    subnetName: skipVnet ? '' : serviceVirtualNetwork.outputs.peSubnetName
-    resourceName: storage.outputs.name
-  }
-}
-
-// Monitor application with Azure Monitor
-module monitoring './core/monitor/monitoring.bicep' = {
-  name: 'monitoring'
-  scope: rg
-  params: {
-    location: location
-    tags: tags
-    logAnalyticsName: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
-    applicationInsightsName: !empty(applicationInsightsName) ? applicationInsightsName : '${abbrs.insightsComponents}${resourceToken}'
-  }
-}
-
-// App outputs
-output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
-output AZURE_LOCATION string = location
-output AZURE_TENANT_ID string = tenant().tenantId
-output SERVICE_API_NAME string = api.outputs.SERVICE_API_NAME
-output AZURE_FUNCTION_NAME string = api.outputs.SERVICE_API_NAME
+output STORAGE_ACCOUNT_NAME string = storageAccountName
+output STORAGE_ACCOUNT_KEY string = storage.outputs.storageAccountKey
+output AZURE_RESOURCE_GROUP string = rg.name

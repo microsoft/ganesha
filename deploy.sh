@@ -1,0 +1,1 @@
+az containerapp up --name ganesha --resource-group rg-ganesha1-txpr6gzpy37jw --location eastus2 --environment env-txpr6gzpy37jw --artifact "./target/ganesha-0.0.1-SNAPSHOT.jar" --ingress external --target-port 8080 --query properties.configuration.ingress.fqdn

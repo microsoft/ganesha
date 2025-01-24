@@ -7,4 +7,7 @@ services:
   api:
     project: ./
     language: java
-    host: containerapps
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ./
