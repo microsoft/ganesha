@@ -27,6 +27,13 @@ import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 import java.util.List;
 //import java.util.Scanner;
 
+import com.azure.core.credential.TokenCredential;
+import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.identity.DefaultAzureCredential;
+
+import com.azure.identity.ClientSecretCredentialBuilder;
+ 
+
 @RestController
 public class SemanticKernelController {
     
@@ -39,16 +46,45 @@ public class SemanticKernelController {
     @Value("${MODEL_ID}")
     private String MODEL_ID;
 
+    @Value("${AZURE_CLIENT_ID}")
+    private String AZURE_CLIENT_ID;
+
+    @Value("${AZURE_TENANT_ID}")
+    private String AZURE_TENANT_ID;
+
+    @Value("${AZURE_CLIENT_SECRET}")
+    private String AZURE_CLIENT_SECRET;
+
 
     @RequestMapping("/sktest")
     public String test() throws ServiceNotFoundException {
+
+        // TokenCredential credential = new DefaultAzureCredentialBuilder().build();
+
+        DefaultAzureCredential credential = new DefaultAzureCredentialBuilder()
+            .managedIdentityClientId(AZURE_CLIENT_ID)
+            .build();
+    
+        // Azure SDK client builders accept the credential as a parameter
+        // SecretClient client = new SecretClientBuilder()
+        //     .vaultUrl("https://{YOUR_VAULT_NAME}.vault.azure.net")
+        //     .credential(credential)
+        //     .buildClient();
+        
+        // TokenCredential credential = new ClientSecretCredentialBuilder()
+        //     .clientId(AZURE_CLIENT_ID)
+        //     .tenantId(AZURE_TENANT_ID)
+        //     .clientSecret(AZURE_CLIENT_SECRET)            
+        //     .build();
+
         OpenAIAsyncClient client;
 
         //if (AZURE_CLIENT_KEY != null) {
         client = new OpenAIClientBuilder()
-            .credential(new AzureKeyCredential(AZURE_CLIENT_KEY))
+            // .credential(new AzureKeyCredential(AZURE_CLIENT_KEY))
+            .credential(credential)
             .endpoint(CLIENT_ENDPOINT)
-            .buildAsyncClient();
+            .buildAsyncClient();            
 
         // } else {
         //     client = new OpenAIClientBuilder()
