@@ -2,17 +2,6 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "func",
-			"label": "func: host start",
-			"command": "host start",
-			"problemMatcher": "$func-java-watch",
-			"isBackground": true,
-			"options": {
-				"cwd": "${workspaceFolder}/target/azure-functions/ganesha-functions"
-			},
-			"dependsOn": "package (functions)"
-		},
-		{
 			"label": "package (functions)",
 			"command": "mvn clean package",
 			"type": "shell",
@@ -22,17 +11,6 @@
 			},
 			"options": {
 				"cwd": "${workspaceFolder}"
-			}
-		},
-		{
-			// https://github.com/Azure/Azurite/issues/607
-			"type": "process",
-			"label": "azurite auto start",
-			"command": "${command:azurite.start}",
-			"problemMatcher": [],
-			"isBackground": true,
-			"runOptions": {
-				"runOn": "folderOpen"
 			}
 		}
 	]
