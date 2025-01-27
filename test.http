@@ -1,3 +1,5 @@
 GET http://localhost:8080/hello
 
 ###
+
+GET https://container-app-txpr6gzpy37jw.lemonriver-b5703136.eastus2.azurecontainerapps.io/hello
