@@ -30,7 +30,7 @@ import java.util.List;
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.identity.DefaultAzureCredential;
-
+import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
  
 
@@ -59,12 +59,17 @@ public class SemanticKernelController {
     @RequestMapping("/sktest")
     public String test() throws ServiceNotFoundException {
 
-        // TokenCredential credential = new DefaultAzureCredentialBuilder().build();
-
-        DefaultAzureCredential credential = new DefaultAzureCredentialBuilder()
-            .managedIdentityClientId(AZURE_CLIENT_ID)
+        TokenCredential credential = null;
+        if(AZURE_CLIENT_ID != null && !AZURE_CLIENT_ID.isEmpty()) {
+            credential = new ClientSecretCredentialBuilder()
+            .clientId(AZURE_CLIENT_ID)
+            .tenantId(AZURE_TENANT_ID)
+            .clientSecret(AZURE_CLIENT_SECRET)            
             .build();
-    
+        } else {
+            credential = new DefaultAzureCredentialBuilder().build();
+        }   
+
         // Azure SDK client builders accept the credential as a parameter
         // SecretClient client = new SecretClientBuilder()
         //     .vaultUrl("https://{YOUR_VAULT_NAME}.vault.azure.net")
