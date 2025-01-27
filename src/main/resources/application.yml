@@ -1,3 +1,7 @@
 AZURE_CLIENT_KEY: 
 CLIENT_ENDPOINT: 
 MODEL_ID:
+
+spring:
+  config:
+    import: application-local.yml
