@@ -187,3 +187,4 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
 output STORAGE_ACCOUNT_NAME string = storageAccountName
 output STORAGE_ACCOUNT_KEY string = storage.outputs.storageAccountKey
 output AZURE_RESOURCE_GROUP string = rg.name
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.loginServer

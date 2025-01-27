@@ -15,7 +15,8 @@
 		"vscode": {
 			"extensions": [
 				"vmware.vscode-boot-dev-pack",
-				"ms-azuretools.vscode-docker"
+				"ms-azuretools.vscode-docker",
+				"humao.rest-client"
 			]
 		}
 	}
