@@ -1,5 +1,6 @@
 package com.microsoft.ganesha;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.azure.ai.openai.OpenAIAsyncClient;
@@ -29,13 +30,15 @@ import java.util.List;
 @RestController
 public class SemanticKernelController {
     
-    //private static final String CLIENT_KEY = System.getenv("CLIENT_KEY");
-    private static final String AZURE_CLIENT_KEY ="YOUR KEY HERE";//System.getenv("AZURE_CLIENT_KEY");
+    @Value("${AZURE_CLIENT_KEY}")
+    private String AZURE_CLIENT_KEY;
+    
+    @Value("${CLIENT_ENDPOINT}")
+    private String CLIENT_ENDPOINT;
 
-    // Only required if AZURE_CLIENT_KEY is set
-    private static final String CLIENT_ENDPOINT ="https://AOAIPROJECTNAME.openai.azure.com/";// System.getenv("CLIENT_ENDPOINT");
-    private static final String MODEL_ID = System.getenv()
-        .getOrDefault("MODEL_ID", "gpt-4o");
+    @Value("${MODEL_ID}")
+    private String MODEL_ID;
+
 
     @RequestMapping("/sktest")
     public String test() throws ServiceNotFoundException {
