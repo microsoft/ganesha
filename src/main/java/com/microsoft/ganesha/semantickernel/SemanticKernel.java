@@ -5,6 +5,9 @@ import java.util.List;
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.credential.TokenRequestContext;
+import com.azure.core.http.HttpPipelineBuilder;
+import com.azure.core.http.policy.HttpPipelinePolicy;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
@@ -33,13 +36,15 @@ public class SemanticKernel {
     private final String clientSecret;
     private final String endpoint;
     private final String modelId;
+    private final String projectId;
 
-    public SemanticKernel(String clientId, String tenantId, String clientSecret, String endpoint, String modelId) {
+    public SemanticKernel(String clientId, String tenantId, String clientSecret, String endpoint, String modelId, String projectId) {
         this.clientId = clientId;
         this.tenantId = tenantId;
         this.clientSecret = clientSecret;
         this.endpoint = endpoint;
         this.modelId = modelId;
+        this.projectId = projectId;
     }
     
 
@@ -71,12 +76,37 @@ public class SemanticKernel {
 
     private Kernel InstantiateKernel() throws SemanticKernelException{
         TokenCredential credential = null;
+        OpenAIAsyncClient client;
+
         if(clientId != null && !clientId.isEmpty()) {
             credential = new ClientSecretCredentialBuilder()
             .clientId(clientId)
             .tenantId(tenantId)
             .clientSecret(clientSecret)            
             .build();
+
+            TokenRequestContext requestContext = new TokenRequestContext().addScopes("https://cognitiveservices.azure.com/.default");
+
+            String authToken = "Bearer " + credential.getTokenSync(requestContext).getToken();
+
+            HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
+                context.getHttpRequest().getHeaders().set("projectId", projectId);
+                context.getHttpRequest().getHeaders().set("Authorization", authToken);
+                return next.process();
+            };
+
+            HttpPipelineBuilder pipelineBuilder = new HttpPipelineBuilder()
+                .policies(customHeaderPolicy);
+
+            var pipeline = pipelineBuilder.build();
+
+            client = new OpenAIClientBuilder()
+            .credential(credential)
+            .endpoint(endpoint)
+            .pipeline(pipeline)
+            .buildAsyncClient();   
+
+
         } else {
             var builder = new DefaultAzureCredentialBuilder();
 
@@ -85,14 +115,12 @@ public class SemanticKernel {
             }
 
             credential = builder.build();
-        }   
 
-        OpenAIAsyncClient client;
-
-        client = new OpenAIClientBuilder()
+            client = new OpenAIClientBuilder()
             .credential(credential)
             .endpoint(endpoint)
-            .buildAsyncClient();         
+            .buildAsyncClient();   
+        }   
         
         // Create your AI service client
         ChatCompletionService chatService = OpenAIChatCompletion.builder()

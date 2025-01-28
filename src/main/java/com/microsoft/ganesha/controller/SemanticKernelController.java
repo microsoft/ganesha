@@ -16,34 +16,37 @@ import com.microsoft.semantickernel.services.ServiceNotFoundException;
 public class SemanticKernelController {
     
     @Value("${AZURE_CLIENT_KEY}")
-    private String AZURE_CLIENT_KEY;
+    private String azureClientKey;
 
     @Value("${CLIENT_ENDPOINT}")
-    private String CLIENT_ENDPOINT;
+    private String clientEndpoint;
 
     @Value("${MODEL_ID}")
-    private String MODEL_ID;
+    private String modelId;
 
     @Value("${AZURE_CLIENT_ID}")
-    private String AZURE_CLIENT_ID;
+    private String azureClientId;
 
     @Value("${AZURE_TENANT_ID}")
-    private String AZURE_TENANT_ID;
+    private String azureTenantId;
 
     @Value("${AZURE_CLIENT_SECRET}")
-    private String AZURE_CLIENT_SECRET;
+    private String azureClientSecret;
+
+    @Value("${AZURE_PROJECT_ID}")
+    private String azureProjectId;
 
     @GetMapping("/lightstatus")
     String test() throws SemanticKernelException, ServiceNotFoundException {
 
-        SemanticKernel sk = new SemanticKernel(AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_CLIENT_SECRET, CLIENT_ENDPOINT, MODEL_ID);
+        SemanticKernel sk = new SemanticKernel(azureClientId, azureTenantId, azureClientSecret, clientEndpoint, modelId, azureProjectId);
         return sk.GetSKResult("List the lights and if they are off or on.");
     }
     
     @PostMapping("/prompt")
     String replaceEmployee(@RequestBody Prompt prompt) throws SemanticKernelException, ServiceNotFoundException {
     
-        SemanticKernel sk = new SemanticKernel(AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_CLIENT_SECRET, CLIENT_ENDPOINT, MODEL_ID);
+        SemanticKernel sk = new SemanticKernel(azureClientId, azureTenantId, azureClientSecret, clientEndpoint, modelId, azureProjectId);
         return sk.GetSKResult(prompt.getPrompt());
   }
 }
