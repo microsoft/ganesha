@@ -78,7 +78,13 @@ public class SemanticKernel {
             .clientSecret(clientSecret)            
             .build();
         } else {
-            credential = new DefaultAzureCredentialBuilder().build();
+            var builder = new DefaultAzureCredentialBuilder();
+
+            if (tenantId != null && !tenantId.isEmpty()) {
+                builder.tenantId(tenantId);
+            }
+
+            credential = builder.build();
         }   
 
         OpenAIAsyncClient client;
