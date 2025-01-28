@@ -6,6 +6,7 @@ import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
+import com.azure.core.http.HttpPipeline;
 import com.azure.core.http.HttpPipelineBuilder;
 import com.azure.core.http.policy.HttpPipelinePolicy;
 import com.azure.identity.ClientSecretCredentialBuilder;
@@ -98,7 +99,7 @@ public class SemanticKernel {
             HttpPipelineBuilder pipelineBuilder = new HttpPipelineBuilder()
                 .policies(customHeaderPolicy);
 
-            var pipeline = pipelineBuilder.build();
+            HttpPipeline pipeline = pipelineBuilder.build();
 
             client = new OpenAIClientBuilder()
             .credential(credential)
