@@ -1,8 +1,10 @@
-GET http://localhost:8080/hello
+
+GET http://localhost:8080/lightstatus
 
 ###
+POST  http://localhost:8080/prompt 
+Content-Type: application/json
 
-GET http://localhost:8080/sktest
-
-
-GET https://container-app-txpr6gzpy37jw.lemonriver-b5703136.eastus2.azurecontainerapps.io/hello
+{
+    "prompt": "Turn off all the lights"
+}
