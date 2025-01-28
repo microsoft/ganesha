@@ -1,4 +1,4 @@
-package com.microsoft.ganesha;
+package com.microsoft.ganesha.plugins;
 
 public class LightModel {
 

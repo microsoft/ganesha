@@ -1,4 +1,4 @@
-package com.microsoft.ganesha;
+package com.microsoft.ganesha.plugins;
 
 import com.microsoft.semantickernel.semanticfunctions.annotations.DefineKernelFunction;
 import com.microsoft.semantickernel.semanticfunctions.annotations.KernelFunctionParameter;
