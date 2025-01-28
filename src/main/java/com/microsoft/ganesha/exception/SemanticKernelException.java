@@ -1,8 +1,8 @@
-package com.microsoft.ganesha.semantickernel;
+package com.microsoft.ganesha.exception;
 
 public class SemanticKernelException extends RuntimeException {
 
     SemanticKernelException(String prompt) {
-      super("Error  running prompt " + prompt);
+      super("Error running prompt " + prompt);
     }
   }

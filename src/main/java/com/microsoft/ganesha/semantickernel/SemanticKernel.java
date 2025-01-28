@@ -8,6 +8,7 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
+import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.plugins.LightModel;
 import com.microsoft.ganesha.plugins.LightsPlugin;
 import com.microsoft.semantickernel.Kernel;
