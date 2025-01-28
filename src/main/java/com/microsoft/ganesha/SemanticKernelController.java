@@ -32,14 +32,13 @@ import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.identity.DefaultAzureCredential;
 import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
- 
 
 @RestController
 public class SemanticKernelController {
-    
+
     @Value("${AZURE_CLIENT_KEY}")
     private String AZURE_CLIENT_KEY;
-    
+
     @Value("${CLIENT_ENDPOINT}")
     private String CLIENT_ENDPOINT;
 
@@ -55,56 +54,61 @@ public class SemanticKernelController {
     @Value("${AZURE_CLIENT_SECRET}")
     private String AZURE_CLIENT_SECRET;
 
-
     @RequestMapping("/sktest")
     public String test() throws ServiceNotFoundException {
 
         TokenCredential credential = null;
-        if(AZURE_CLIENT_ID != null && !AZURE_CLIENT_ID.isEmpty()) {
+        if (AZURE_CLIENT_ID != null && !AZURE_CLIENT_ID.isEmpty()) {
             credential = new ClientSecretCredentialBuilder()
-            .clientId(AZURE_CLIENT_ID)
-            .tenantId(AZURE_TENANT_ID)
-            .clientSecret(AZURE_CLIENT_SECRET)            
-            .build();
+                    .clientId(AZURE_CLIENT_ID)
+                    .tenantId(AZURE_TENANT_ID)
+                    .clientSecret(AZURE_CLIENT_SECRET)
+                    .build();
         } else {
-            credential = new DefaultAzureCredentialBuilder().build();
-        }   
+            var builder = new DefaultAzureCredentialBuilder();
+
+            if (AZURE_TENANT_ID != null && !AZURE_TENANT_ID.isEmpty()) {
+                builder.tenantId(AZURE_TENANT_ID);
+            }
+
+            credential = builder.build();
+        }
 
         // Azure SDK client builders accept the credential as a parameter
         // SecretClient client = new SecretClientBuilder()
-        //     .vaultUrl("https://{YOUR_VAULT_NAME}.vault.azure.net")
-        //     .credential(credential)
-        //     .buildClient();
-        
+        // .vaultUrl("https://{YOUR_VAULT_NAME}.vault.azure.net")
+        // .credential(credential)
+        // .buildClient();
+
         // TokenCredential credential = new ClientSecretCredentialBuilder()
-        //     .clientId(AZURE_CLIENT_ID)
-        //     .tenantId(AZURE_TENANT_ID)
-        //     .clientSecret(AZURE_CLIENT_SECRET)            
-        //     .build();
+        // .clientId(AZURE_CLIENT_ID)
+        // .tenantId(AZURE_TENANT_ID)
+        // .clientSecret(AZURE_CLIENT_SECRET)
+        // .build();
 
         OpenAIAsyncClient client;
 
-        //if (AZURE_CLIENT_KEY != null) {
+        // if (AZURE_CLIENT_KEY != null) {
         client = new OpenAIClientBuilder()
-            // .credential(new AzureKeyCredential(AZURE_CLIENT_KEY))
-            .credential(credential)
-            .endpoint(CLIENT_ENDPOINT)
-            .buildAsyncClient();            
+                // .credential(new AzureKeyCredential(AZURE_CLIENT_KEY))
+                .credential(credential)
+                .endpoint(CLIENT_ENDPOINT)
+                .buildAsyncClient();
 
         // } else {
-        //     client = new OpenAIClientBuilder()
-        //         .credential(new KeyCredential(CLIENT_KEY))
-        //         .buildAsyncClient();
+        // client = new OpenAIClientBuilder()
+        // .credential(new KeyCredential(CLIENT_KEY))
+        // .buildAsyncClient();
         // }
 
         // Create your AI service client
         ChatCompletionService chatService = OpenAIChatCompletion.builder()
-            .withModelId(MODEL_ID)
-            .withOpenAIAsyncClient(client)
-            .build();
+                .withModelId(MODEL_ID)
+                .withOpenAIAsyncClient(client)
+                .build();
         // Create a plugin (the LightsPlugin class is defined separately)
         KernelPlugin lightPlugin = KernelPluginFactory.createFromObject(new LightsPlugin(),
-            "LightsPlugin");
+                "LightsPlugin");
 
         // Create a kernel with Azure OpenAI chat completion and plugin
         Kernel.Builder builder = Kernel.builder();
@@ -114,12 +118,12 @@ public class SemanticKernelController {
         Kernel kernel = builder.build();
 
         ChatCompletionService chatCompletionService = kernel.getService(
-            ChatCompletionService.class);
+                ChatCompletionService.class);
 
         ContextVariableTypes
-            .addGlobalConverter(ContextVariableTypeConverter.builder(LightModel.class)
-                .toPromptString(new Gson()::toJson)
-                .build());
+                .addGlobalConverter(ContextVariableTypeConverter.builder(LightModel.class)
+                        .toPromptString(new Gson()::toJson)
+                        .build());
 
         KernelHooks hook = new KernelHooks();
 
@@ -129,27 +133,27 @@ public class SemanticKernelController {
         });
 
         hook.addPreChatCompletionHook(
-            (context) -> {
-                System.out.println("Pre-chat completion hook");
-                return context;
-            });
+                (context) -> {
+                    System.out.println("Pre-chat completion hook");
+                    return context;
+                });
 
         hook.addPostChatCompletionHook(
-            (context) -> {
-                System.out.println("Post-chat completion hook");
-                return context;
-            });
+                (context) -> {
+                    System.out.println("Post-chat completion hook");
+                    return context;
+                });
 
         kernel.getGlobalKernelHooks().addHooks(hook);
 
         // Enable planning
         InvocationContext invocationContext = new Builder()
-            .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
-            .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
-            .withContextVariableConverter(ContextVariableTypeConverter.builder(LightModel.class)
-                .toPromptString(new Gson()::toJson)
-                .build())
-            .build();
+                .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
+                .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
+                .withContextVariableConverter(ContextVariableTypeConverter.builder(LightModel.class)
+                        .toPromptString(new Gson()::toJson)
+                        .build())
+                .build();
 
         // Create a history to store the conversation
         ChatHistory history = new ChatHistory();
@@ -157,7 +161,7 @@ public class SemanticKernelController {
         List<ChatMessageContent<?>> results;
         try {
             results = chatCompletionService.getChatMessageContentsAsync(
-                history, kernel, invocationContext).block();
+                    history, kernel, invocationContext).block();
             return results.toString();
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -168,22 +172,24 @@ public class SemanticKernelController {
         // Scanner scanner = new Scanner(System.in);
         // String userInput;
         // do {
-        //     // Collect user input
-        //     System.out.print("User > ");
-        //     userInput = scanner.nextLine();
-        //     // Add user input
-        //     history.addUserMessage(userInput);
-        //     List<ChatMessageContent<?>> results = chatCompletionService.getChatMessageContentsAsync(
-        //         history, kernel, invocationContext).block();
-        //     for (ChatMessageContent<?> result : results) {
-        //         // Print the results
-        //         if (result.getAuthorRole() == AuthorRole.ASSISTANT && result.getContent() != null) {
-        //             System.out.println("Assistant > " + result);
-        //         }
-        //         // Add the message from the agent to the chat history
-        //         history.addMessage(result);
-        //     }
+        // // Collect user input
+        // System.out.print("User > ");
+        // userInput = scanner.nextLine();
+        // // Add user input
+        // history.addUserMessage(userInput);
+        // List<ChatMessageContent<?>> results =
+        // chatCompletionService.getChatMessageContentsAsync(
+        // history, kernel, invocationContext).block();
+        // for (ChatMessageContent<?> result : results) {
+        // // Print the results
+        // if (result.getAuthorRole() == AuthorRole.ASSISTANT && result.getContent() !=
+        // null) {
+        // System.out.println("Assistant > " + result);
+        // }
+        // // Add the message from the agent to the chat history
+        // history.addMessage(result);
+        // }
         // } while (userInput != null && !userInput.isEmpty());
 
-    }    
+    }
 }
