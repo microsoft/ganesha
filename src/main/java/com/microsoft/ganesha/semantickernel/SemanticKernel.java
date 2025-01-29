@@ -12,6 +12,7 @@ import com.azure.core.http.policy.HttpPipelinePolicy;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
+import com.microsoft.ganesha.config.AppConfig;
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.plugins.LightModel;
 import com.microsoft.ganesha.plugins.LightsPlugin;
@@ -32,20 +33,12 @@ import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 
 public class SemanticKernel {
 
-    private final String clientId;
-    private final String tenantId;
-    private final String clientSecret;
-    private final String endpoint;
-    private final String modelId;
-    private final String projectId;
+    private final AppConfig config;
 
-    public SemanticKernel(String clientId, String tenantId, String clientSecret, String endpoint, String modelId, String projectId) {
-        this.clientId = clientId;
-        this.tenantId = tenantId;
-        this.clientSecret = clientSecret;
-        this.endpoint = endpoint;
-        this.modelId = modelId;
-        this.projectId = projectId;
+    
+
+    public SemanticKernel(AppConfig config) {
+        this.config = config;
     }
     
 
@@ -79,11 +72,11 @@ public class SemanticKernel {
         TokenCredential credential = null;
         OpenAIAsyncClient client;
 
-        if(clientId != null && !clientId.isEmpty()) {
+        if(config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
             credential = new ClientSecretCredentialBuilder()
-            .clientId(clientId)
-            .tenantId(tenantId)
-            .clientSecret(clientSecret)            
+            .clientId(config.getAzureClientId())
+            .tenantId(config.getAzureTenantId())
+            .clientSecret(config.getAzureClientSecret())            
             .build();
 
             TokenRequestContext requestContext = new TokenRequestContext().addScopes("https://cognitiveservices.azure.com/.default");
@@ -91,7 +84,7 @@ public class SemanticKernel {
             String authToken = "Bearer " + credential.getTokenSync(requestContext).getToken();
 
             HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
-                context.getHttpRequest().getHeaders().set("projectId", projectId);
+                context.getHttpRequest().getHeaders().set("projectId", config.getProjectId());
                 context.getHttpRequest().getHeaders().set("Authorization", authToken);
                 return next.process();
             };
@@ -103,7 +96,7 @@ public class SemanticKernel {
 
             client = new OpenAIClientBuilder()
             .credential(credential)
-            .endpoint(endpoint)
+            .endpoint(config.getClientEndpoint())
             .pipeline(pipeline)
             .buildAsyncClient();   
 
@@ -111,21 +104,21 @@ public class SemanticKernel {
         } else {
             var builder = new DefaultAzureCredentialBuilder();
 
-            if (tenantId != null && !tenantId.isEmpty()) {
-                builder.tenantId(tenantId);
+            if (config.getAzureTenantId() != null && !config.getAzureTenantId().isEmpty()) {
+                builder.tenantId(config.getAzureTenantId());
             }
 
             credential = builder.build();
 
             client = new OpenAIClientBuilder()
             .credential(credential)
-            .endpoint(endpoint)
-            .buildAsyncClient();   
-        }   
+            .endpoint(config.getAzureClientId())
+            .buildAsyncClient();         
+        }
         
         // Create your AI service client
         ChatCompletionService chatService = OpenAIChatCompletion.builder()
-            .withModelId(modelId)
+            .withModelId(config.getModelId())
             .withOpenAIAsyncClient(client)
             .build();
         // Create a plugin (the LightsPlugin class is defined separately)
