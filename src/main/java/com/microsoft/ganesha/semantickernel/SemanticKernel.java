@@ -14,8 +14,8 @@ import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
 import com.microsoft.ganesha.config.AppConfig;
 import com.microsoft.ganesha.exception.SemanticKernelException;
-import com.microsoft.ganesha.plugins.LightModel;
-import com.microsoft.ganesha.plugins.LightsPlugin;
+import com.microsoft.ganesha.plugins.CallerActivitiesPlugin;
+import com.microsoft.ganesha.plugins.OrderActivities;
 import com.microsoft.semantickernel.Kernel;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatCompletion;
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypeConverter;
@@ -50,7 +50,45 @@ public class SemanticKernel {
         InvocationContext invocationContext = new Builder()
             .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
             .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
-            .withContextVariableConverter(ContextVariableTypeConverter.builder(LightModel.class)
+            .withContextVariableConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
+                .toPromptString(new Gson()::toJson)
+                .build())
+            .build();
+
+        List<ChatMessageContent<?>> results;
+        ChatCompletionService chatCompletionService = kernel.getService(
+            ChatCompletionService.class);
+        try {
+            results = chatCompletionService.getChatMessageContentsAsync(
+                prompt, kernel, invocationContext).block();
+            return results.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }    
+
+    public String GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
+       
+        Kernel kernel = InstantiateKernel();
+
+        String prompt = """
+        You are an assistant to customer service agents for a prescription fulfillment call center. Given a provided set of activities associated with a specific member, predict the reason they would call into the call center. Include all possible reasons for a call, ordered by likelihood if the percentage of call reasons are the following:
+        Cancelled orders - 50%
+        Closed orders - 21%
+        Booked orders - 19%
+        Entered orders - 10%
+        ##Example##
+        Likely call reason in order of highest likelihood:
+        - [medication name] from date [prescription date] which was canceled
+        - [medication name] from date [prescription date] in Entered state
+        """;
+        
+        // Enable planning
+        InvocationContext invocationContext = new Builder()
+            .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
+            .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
+            .withContextVariableConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
                 .toPromptString(new Gson()::toJson)
                 .build())
             .build();
@@ -121,19 +159,18 @@ public class SemanticKernel {
             .withModelId(config.getModelId())
             .withOpenAIAsyncClient(client)
             .build();
-        // Create a plugin (the LightsPlugin class is defined separately)
-        KernelPlugin lightPlugin = KernelPluginFactory.createFromObject(new LightsPlugin(),
-            "LightsPlugin");
+        // Create a plugin (the CallerActivitiesPlugin class is defined separately)
+        KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(), "CallerActivitiesPlugin");
 
         // Create a kernel with Azure OpenAI chat completion and plugin
         Kernel.Builder builder = Kernel.builder();
         builder.withAIService(ChatCompletionService.class, chatService);
-        builder.withPlugin(lightPlugin);
+        builder.withPlugin(callerActivitiesPlugin);
         // Build the kernel
         Kernel kernel = builder.build();        
 
         ContextVariableTypes
-            .addGlobalConverter(ContextVariableTypeConverter.builder(LightModel.class)
+            .addGlobalConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
                 .toPromptString(new Gson()::toJson)
                 .build());
 

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.microsoft.ganesha.config.AppConfig;
 import com.microsoft.ganesha.exception.SemanticKernelException;
+import com.microsoft.ganesha.semantickernel.MemberId;
 import com.microsoft.ganesha.semantickernel.Prompt;
 import com.microsoft.ganesha.semantickernel.SemanticKernel;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
@@ -19,17 +20,24 @@ public class SemanticKernelController {
     @Autowired
     private AppConfig config;
 
-    @GetMapping("/lightstatus")
-    String test() throws SemanticKernelException, ServiceNotFoundException {
+    // @GetMapping("/lightstatus")
+    // String test() throws SemanticKernelException, ServiceNotFoundException {
 
-        SemanticKernel sk = new SemanticKernel(config);
-        return sk.GetSKResult("List the lights and if they are off or on.");
-    }
+    //     SemanticKernel sk = new SemanticKernel(config);
+    //     return sk.GetSKResult("List the lights and if they are off or on.");
+    // }
     
     @PostMapping("/prompt")
     String replaceEmployee(@RequestBody Prompt prompt) throws SemanticKernelException, ServiceNotFoundException {
     
         SemanticKernel sk = new SemanticKernel(config);
         return sk.GetSKResult(prompt.getPrompt());
+    }
+
+    @PostMapping("/predictReason")
+    String predictReason(@RequestBody MemberId memberid) throws SemanticKernelException, ServiceNotFoundException {
+    
+        SemanticKernel sk = new SemanticKernel(config);
+        return sk.GetReasons(memberid.GetMemberId());
+    }
   }
-}
