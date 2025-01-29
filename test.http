@@ -8,3 +8,11 @@ Content-Type: application/json
 {
     "prompt": "Why might member with id 12345 be calling us?"
 }
+
+###
+POST  http://localhost:8080/predictReason 
+Content-Type: application/json
+
+{
+    "memberid": "12345"
+}
