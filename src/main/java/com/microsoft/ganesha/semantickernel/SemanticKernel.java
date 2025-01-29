@@ -5,6 +5,10 @@ import java.util.List;
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.credential.TokenRequestContext;
+import com.azure.core.http.HttpPipeline;
+import com.azure.core.http.HttpPipelineBuilder;
+import com.azure.core.http.policy.HttpPipelinePolicy;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
@@ -104,32 +108,55 @@ public class SemanticKernel {
 
     private Kernel InstantiateKernel() throws SemanticKernelException{
         TokenCredential credential = null;
-        if(config.getAZURE_CLIENT_ID() != null && !config.getAZURE_CLIENT_ID().isEmpty()) {
+        OpenAIAsyncClient client;
+
+        if(config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
             credential = new ClientSecretCredentialBuilder()
-            .clientId(config.getAZURE_CLIENT_ID())
-            .tenantId(config.getAZURE_TENANT_ID())
-            .clientSecret(config.getAZURE_CLIENT_SECRET())            
+            .clientId(config.getAzureClientId())
+            .tenantId(config.getAzureTenantId())
+            .clientSecret(config.getAzureClientSecret())            
             .build();
+
+            TokenRequestContext requestContext = new TokenRequestContext().addScopes("https://cognitiveservices.azure.com/.default");
+
+            String authToken = "Bearer " + credential.getTokenSync(requestContext).getToken();
+
+            HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
+                context.getHttpRequest().getHeaders().set("projectId", config.getProjectId());
+                context.getHttpRequest().getHeaders().set("Authorization", authToken);
+                return next.process();
+            };
+
+            HttpPipelineBuilder pipelineBuilder = new HttpPipelineBuilder()
+                .policies(customHeaderPolicy);
+
+            HttpPipeline pipeline = pipelineBuilder.build();
+
+            client = new OpenAIClientBuilder()
+            .credential(credential)
+            .endpoint(config.getClientEndpoint())
+            .pipeline(pipeline)
+            .buildAsyncClient();   
+
+
         } else {
             var builder = new DefaultAzureCredentialBuilder();
 
-            if (config.getAZURE_TENANT_ID() != null && !config.getAZURE_TENANT_ID().isEmpty()) {
-                builder.tenantId(config.getAZURE_TENANT_ID());
+            if (config.getAzureTenantId() != null && !config.getAzureTenantId().isEmpty()) {
+                builder.tenantId(config.getAzureTenantId());
             }
 
             credential = builder.build();
-        }   
 
-        OpenAIAsyncClient client;
-
-        client = new OpenAIClientBuilder()
+            client = new OpenAIClientBuilder()
             .credential(credential)
-            .endpoint(config.getCLIENT_ENDPOINT())
+            .endpoint(config.getClientEndpoint())
             .buildAsyncClient();         
+        }
         
         // Create your AI service client
         ChatCompletionService chatService = OpenAIChatCompletion.builder()
-            .withModelId(config.getMODEL_ID())
+            .withModelId(config.getModelId())
             .withOpenAIAsyncClient(client)
             .build();
         // Create a plugin (the CallerActivitiesPlugin class is defined separately)
