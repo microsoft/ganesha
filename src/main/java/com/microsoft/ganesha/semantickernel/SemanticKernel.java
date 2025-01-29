@@ -5,12 +5,14 @@ import java.util.List;
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.HttpPipelineBuilder;
+import com.azure.core.http.policy.HttpPipelinePolicy;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
 import com.microsoft.ganesha.exception.SemanticKernelException;
-import com.microsoft.ganesha.plugins.LightModel;
-import com.microsoft.ganesha.plugins.LightsPlugin;
+import com.microsoft.ganesha.plugins.CallerActivitiesPlugin;
+import com.microsoft.ganesha.plugins.OrderActivities;
 import com.microsoft.semantickernel.Kernel;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatCompletion;
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypeConverter;
@@ -33,6 +35,7 @@ public class SemanticKernel {
     private final String clientSecret;
     private final String endpoint;
     private final String modelId;
+    private final String projectId;
 
     public SemanticKernel(String clientId, String tenantId, String clientSecret, String endpoint, String modelId) {
         this.clientId = clientId;
@@ -40,6 +43,7 @@ public class SemanticKernel {
         this.clientSecret = clientSecret;
         this.endpoint = endpoint;
         this.modelId = modelId;
+        this.projectId = null;
     }
     
 
@@ -51,7 +55,7 @@ public class SemanticKernel {
         InvocationContext invocationContext = new Builder()
             .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
             .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
-            .withContextVariableConverter(ContextVariableTypeConverter.builder(LightModel.class)
+            .withContextVariableConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
                 .toPromptString(new Gson()::toJson)
                 .build())
             .build();
@@ -89,9 +93,20 @@ public class SemanticKernel {
 
         OpenAIAsyncClient client;
 
+        //        HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
+        //     context.getHttpRequest().getHeaders().set("projectId", projectId);
+        //     return next.process();
+        // };
+
+        // HttpPipelineBuilder pipelineBuilder = new HttpPipelineBuilder()
+        //     .policies(customHeaderPolicy);
+
+        // var pipeline = pipelineBuilder.build();
+
         client = new OpenAIClientBuilder()
             .credential(credential)
             .endpoint(endpoint)
+            // .pipeline(pipeline)
             .buildAsyncClient();         
         
         // Create your AI service client
@@ -100,18 +115,17 @@ public class SemanticKernel {
             .withOpenAIAsyncClient(client)
             .build();
         // Create a plugin (the LightsPlugin class is defined separately)
-        KernelPlugin lightPlugin = KernelPluginFactory.createFromObject(new LightsPlugin(),
-            "LightsPlugin");
+        KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(), "CallerActivitiesPlugin");
 
         // Create a kernel with Azure OpenAI chat completion and plugin
         Kernel.Builder builder = Kernel.builder();
         builder.withAIService(ChatCompletionService.class, chatService);
-        builder.withPlugin(lightPlugin);
+        builder.withPlugin(callerActivitiesPlugin);
         // Build the kernel
         Kernel kernel = builder.build();        
 
         ContextVariableTypes
-            .addGlobalConverter(ContextVariableTypeConverter.builder(LightModel.class)
+            .addGlobalConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
                 .toPromptString(new Gson()::toJson)
                 .build());
 
