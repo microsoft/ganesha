@@ -112,7 +112,7 @@ public class SemanticKernel {
 
             client = new OpenAIClientBuilder()
             .credential(credential)
-            .endpoint(config.getAzureClientId())
+            .endpoint(config.getClientEndpoint())
             .buildAsyncClient();         
         }
         
