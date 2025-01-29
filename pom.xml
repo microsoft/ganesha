@@ -51,6 +51,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        
 		 <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-reactor-3.1</artifactId>
@@ -94,11 +99,11 @@
             <artifactId>log4j-core</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -112,6 +117,26 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-identity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-spring-data-cosmos</artifactId>
+            <version>5.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-cosmos</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>spring-data-cosmosdb</artifactId>
+            <version>2.1.10</version>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
@@ -151,8 +176,18 @@
             <groupId>com.github.victools</groupId>
             <artifactId>jsonschema-module-jackson</artifactId>
         </dependency>
-	</dependencies>
-
+        <dependency>
+            <groupId>com.lihaoyi</groupId>
+            <artifactId>mill-main-api_2.12</artifactId>
+            <version>0.5.1-21-9354e9</version>
+        </dependency>     
+ 
+        <dependency>
+            <groupId>com.amido.stacks.modules</groupId>
+            <artifactId>stacks-azure-cosmos</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+    </dependencies>
 	<build>
 		<plugins>
 			<plugin>

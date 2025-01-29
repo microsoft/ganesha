@@ -8,3 +8,5 @@ Content-Type: application/json
 {
     "prompt": "Turn off all the lights"
 }
+###
+Get http://localhost:8080/findbyid?param=123
