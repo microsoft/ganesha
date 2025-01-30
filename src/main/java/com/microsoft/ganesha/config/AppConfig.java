@@ -6,22 +6,25 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppConfig {
     @Value("${AZURE_CLIENT_KEY}")
-    private String AZURE_CLIENT_KEY;
+    private String azureClientKey;
 
     @Value("${CLIENT_ENDPOINT}")
-    private String CLIENT_ENDPOINT;
+    private String clientEndpoint;
 
     @Value("${MODEL_ID}")
-    private String MODEL_ID;
+    private String modelId;
 
     @Value("${AZURE_CLIENT_ID}")
-    private String AZURE_CLIENT_ID;
+    private String azureClientId;
 
     @Value("${AZURE_TENANT_ID}")
-    private String AZURE_TENANT_ID;
+    private String azureTenantId;
 
     @Value("${AZURE_CLIENT_SECRET}")
-    private String AZURE_CLIENT_SECRET;
+    private String azureClientSecret;
+
+    @Value("${AZURE_PROJECT_ID}")
+    private String projectId;
 
     @Value("${AZURE_COSMOS_URI}")
     private String AZURE_COSMOS_URI;
@@ -32,28 +35,32 @@ public class AppConfig {
     @Value("${AZURE_COSMOS_DATABASE}")
     private String AZURE_COSMOS_DATABASE;
 
-    public String getAZURE_CLIENT_KEY() {
-        return AZURE_CLIENT_KEY;
+    public String getAzureClientKey() {
+        return azureClientKey;
     }
 
-    public String getCLIENT_ENDPOINT() {
-        return CLIENT_ENDPOINT;
+    public String getClientEndpoint() {
+        return clientEndpoint;
     }
 
-    public String getMODEL_ID() {
-        return MODEL_ID;
+    public String getModelId() {
+        return modelId;
     }
 
-    public String getAZURE_CLIENT_ID() {
-        return AZURE_CLIENT_ID;
+    public String getAzureClientId() {
+        return azureClientId;
     }
 
-    public String getAZURE_TENANT_ID() {
-        return AZURE_TENANT_ID;
+    public String getAzureTenantId() {
+        return azureTenantId;
     }
 
-    public String getAZURE_CLIENT_SECRET() {
-        return AZURE_CLIENT_SECRET;
+    public String getAzureClientSecret() {
+        return azureClientSecret;
+    }
+
+    public String getProjectId() {
+        return projectId;
     }
     
     public String getAZURE_COSMOS_URI() {

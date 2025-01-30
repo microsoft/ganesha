@@ -6,7 +6,15 @@ POST  http://localhost:8080/prompt
 Content-Type: application/json
 
 {
-    "prompt": "Turn off all the lights"
+    "prompt": "Why might member with id 12345 be calling us?"
+}
+
+###
+POST  http://localhost:8080/predictReason 
+Content-Type: application/json
+
+{
+    "memberid": "12345"
 }
 ###
 Get http://localhost:8080/findbyid?param=123
