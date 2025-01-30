@@ -27,13 +27,13 @@ public class AppConfig {
     private String projectId;
 
     @Value("${AZURE_COSMOS_URI}")
-    private String AZURE_COSMOS_URI;
+    private String azureCosmosURI;
 
     @Value("${AZURE_COSMOS_KEY}")
-    private String AZURE_COSMOS_KEY;
+    private String azureCosmosKey;
 
     @Value("${AZURE_COSMOS_DATABASE}")
-    private String AZURE_COSMOS_DATABASE;
+    private String azureCosmosDatabase;
 
     public String getAzureClientKey() {
         return azureClientKey;
@@ -63,16 +63,16 @@ public class AppConfig {
         return projectId;
     }
     
-    public String getAZURE_COSMOS_URI() {
-        return AZURE_COSMOS_URI;
+    public String getAzureCosmosURI() {
+        return azureCosmosURI;
     }
 
-    public String getAZURE_COSMOS_KEY() {
-        return AZURE_COSMOS_KEY;
+    public String getAzureCosmosKey() {
+        return azureCosmosKey;
     }
 
-    public String getAZURE_COSMOS_DATABASE() {
-        return AZURE_COSMOS_DATABASE;
+    public String getAzureCosmosDatabase() {
+        return azureCosmosDatabase;
     }
 
 }

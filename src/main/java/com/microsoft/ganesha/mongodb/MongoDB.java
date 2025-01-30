@@ -12,7 +12,6 @@ import com.microsoft.ganesha.config.AppConfig;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
 
 @Repository
@@ -41,17 +40,17 @@ public class MongoDB {
 
         TokenCredential credential = null;
 
-        if(config.getAZURE_CLIENT_ID() != null && config.getAZURE_CLIENT_ID().isEmpty()) {
+        if(config.getAzureClientId() != null && config.getAzureClientId().isEmpty()) {
             credential = new ClientSecretCredentialBuilder()
-                .clientId(config.getAZURE_CLIENT_ID())
-                .clientSecret(config.getAZURE_CLIENT_SECRET())
-                .tenantId(config.getAZURE_TENANT_ID())
+                .clientId(config.getAzureClientId())
+                .clientSecret(config.getAzureClientSecret())
+                .tenantId(config.getAzureTenantId())
                 .build();
         } else {
             var builder = new DefaultAzureCredentialBuilder();
 
-            if (config.getAZURE_TENANT_ID() != null && config.getAZURE_TENANT_ID().isEmpty()) {
-                builder.tenantId(config.getAZURE_TENANT_ID());
+            if (config.getAzureTenantId() != null && config.getAzureTenantId().isEmpty()) {
+                builder.tenantId(config.getAzureTenantId());
             }
 
             credential = builder.build();
@@ -61,9 +60,9 @@ public class MongoDB {
 
         client = new CosmosClientBuilder()            
             .credential(credential)
-            .endpoint(config.getAZURE_COSMOS_URI())      
+            .endpoint(config.getAzureCosmosURI())      
             .directMode()
-            // .database(config.getAZURE_COSMOS_DATABASE())
+            // .database(config.getAzureCosmosDatabase())
             .buildAsyncClient();
 
         return client;
@@ -79,6 +78,6 @@ public class MongoDB {
             e.printStackTrace();
         }
 
-        return new CosmosTemplate(client, config.getAZURE_COSMOS_DATABASE(), null, null);
+        return new CosmosTemplate(client, config.getAzureCosmosDatabase(), null, null);
     }
 }
