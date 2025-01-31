@@ -193,6 +193,10 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           name: 'user-assigned-managed-identity-client-id'
           value: managedIdentity.outputs.clientId
         }
+        {
+          name: 'azure-cosmos-connection-string'
+          value: mongoCluster.outputs.connectionStringKey
+        }
       ]
     }
     containers: [
@@ -207,6 +211,10 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           {
             name: 'AZURE_CLIENT_ID'
             secretRef: 'user-assigned-managed-identity-client-id'
+          }
+          {
+            name: 'AAZURE_COSMOS_CONN_STR'
+            secretRef: 'azure-cosmos-connection-string'
           }
         ]
       }
