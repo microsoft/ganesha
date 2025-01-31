@@ -31,3 +31,8 @@ build/
 
 
 src/main/resources/application-local.yml
+
+.vs/
+
+__blobstorage__
+__queuestorage__
