@@ -1,11 +1,13 @@
 package com.microsoft.ganesha.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
+import org.bson.Document;
 
 public class Conversation {
     private UUID id;
@@ -37,6 +39,19 @@ public class Conversation {
                             date);
                 })
                 .toList();
+    }
+
+    public Conversation(Document document) {
+        this.id = UUID.fromString(document.getString("conversationId"));
+        List<Document> messageDocs = document.getList("messages", Document.class);
+        this.messages = new ArrayList<>();
+        for (Document messageDoc : messageDocs) {
+            this.messages.add(new DisplayChatMessage(
+                messageDoc.getString("message"),
+                messageDoc.getString("role"),
+                messageDoc.getDate("time").toInstant().atOffset(java.time.ZoneOffset.UTC)
+            ));
+        }
     }
 
     public UUID getId() {

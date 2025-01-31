@@ -18,19 +18,26 @@ Content-Type: application/json
 }
 ###
 
-GET http://localhost:8080/getFirst
-
-###
-GET http://localhost:8080/alldocs
-
-###
-GET http://localhost:8080/findbypages?pages=1000
-
-###
-POST  http://localhost:8080/upload
+POST http://localhost:8080/conversation
 Content-Type: application/json
 
 {
-    "title": "The Dragon Reborn", 
-    "author": "Robert Jordan", 
-    "pages": 1000}
+  "id": "cec7d4eb-76c2-4b15-ab86-67367ded907d",
+  "messages": [
+    {
+      "message": "Hello, I need help with my prescription.",
+      "role": "USER",
+      "time": "2023-10-01T10:00:00Z"
+    },
+    {
+      "message": "Sure, I can help you with that. Can you provide me with your member ID?",
+      "role": "ASSISTANT",
+      "time": "2023-10-01T10:01:00Z"
+    },
+    {
+      "message": "My member ID is 12345.",
+      "role": "USER",
+      "time": "2023-10-01T10:02:00Z"
+    }
+  ]
+}

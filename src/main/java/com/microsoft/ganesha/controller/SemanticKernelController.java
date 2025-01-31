@@ -1,5 +1,6 @@
 package com.microsoft.ganesha.controller;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,7 @@ import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 
 @RestController
 public class SemanticKernelController {
-    public SemanticKernelController(SemanticKernel kernel, MongoService mongoService) {
+    public SemanticKernelController(SemanticKernel kernel, @Qualifier("mongoDatabaseService") MongoService mongoService) {
         _kernel = kernel;
         _mongoService = mongoService;
     }
