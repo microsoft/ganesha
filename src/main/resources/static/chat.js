@@ -1,7 +1,10 @@
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    const allMessages = [];
+    var currentConversation = {
+        id: null,
+        messages: []
+    };
     document.addEventListener('keyup', handleEnter);
     document.getElementById('send-button').addEventListener('click', handleSubmit);
     document.getElementById('message-input').addEventListener('keyup', handleEnter);
@@ -23,22 +26,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // reset the input field
         chatInput.value = '';
 
-        // todo: replace this part with the actual server call
-        allMessages.push({ role: 'user', message: userMessage, time: new Date() });
-        allMessages.push({ role: 'assistant', message: 'blah blah blah I am a robot blah blah blah', time: new Date() });
+        currentConversation.messages.push({ role: 'user', message: userMessage, time: new Date() });
 
-        updateChat(allMessages);
+        // temporarily show the user message in the chat so that the user knows that their message is being processed
+        displayMessage('user', userMessage, new Date());
+        displayMessage('assistant', 'thinking...', new Date()); // potentially show a spinner instead
+
+        var updatedConversation = await sendMessageToServer(currentConversation);
+
+        currentConversation = updatedConversation;
+
+        displayConversation(currentConversation.messages);
     }
 
-    function updateChat(messages) {
+    function displayConversation(messages) {
         const chatMessages = document.getElementById('messages');
         chatMessages.innerHTML = '';
         messages.forEach(msg => {
-            addMessageToChat(msg.role, msg.message, msg.time);
+            displayMessage(msg.role, msg.message, msg.time);
         });
     }
 
-    function addMessageToChat(role, message, time) {
+    function displayMessage(role, message, time) {
         const chatMessages = document.getElementById('messages');
 
         const messageContainer = document.createElement('div');
@@ -78,22 +87,19 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.appendChild(messageContainer);
     }
 
-    // async function sendMessageToServer(message) {
-    //     const response = await fetch('/chat-endpoint', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json'
-    //       },
-    //       body: JSON.stringify({
-    //         conversationId: window.conversationId,
-    //         message: message
-    //       })
-    //     });
+    async function sendMessageToServer(conversation) {
+        const response = await fetch('/conversation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(conversation)
+        });
 
-    //     const data = await response.json();
-    //     if (data.length > 0) {
-    //       window.conversationId = data[0].conversationId;
-    //     }
-    //     return data;
-    //   }
+        const updatedConversation = await response.json();
+
+        currentConversation = updatedConversation;
+
+        return updatedConversation;
+    }
 });
