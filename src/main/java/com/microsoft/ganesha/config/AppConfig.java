@@ -2,8 +2,10 @@ package com.microsoft.ganesha.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
+@Scope("singleton")
 public class AppConfig {
     @Value("${AZURE_CLIENT_KEY}")
     private String azureClientKey;

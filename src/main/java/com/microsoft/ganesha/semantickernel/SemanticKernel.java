@@ -2,6 +2,9 @@ package com.microsoft.ganesha.semantickernel;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.TokenCredential;
@@ -29,172 +32,217 @@ import com.microsoft.semantickernel.plugin.KernelPlugin;
 import com.microsoft.semantickernel.plugin.KernelPluginFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
+import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 
+@Component
+@Scope("singleton")
 public class SemanticKernel {
+        private final AppConfig config;
 
-    private final AppConfig config;
-
-    
-
-    public SemanticKernel(AppConfig config) {
-        this.config = config;
-    }
-    
-
-    public String GetSKResult(String prompt) throws SemanticKernelException, ServiceNotFoundException {
-       
-        Kernel kernel = InstantiateKernel();
-
-        // Enable planning
-        InvocationContext invocationContext = new Builder()
-            .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
-            .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
-            .withContextVariableConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
-                .toPromptString(new Gson()::toJson)
-                .build())
-            .build();
-
-        List<ChatMessageContent<?>> results;
-        ChatCompletionService chatCompletionService = kernel.getService(
-            ChatCompletionService.class);
-        try {
-            results = chatCompletionService.getChatMessageContentsAsync(
-                prompt, kernel, invocationContext).block();
-            return results.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
+        public SemanticKernel(AppConfig config) {
+                this.config = config;
         }
-        return "";
-    }    
 
-    public String GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
-       
-        Kernel kernel = InstantiateKernel();
+        public ChatHistory Converse(ChatHistory chatHistory)
+                        throws SemanticKernelException, ServiceNotFoundException {
+                Kernel kernel = InstantiateKernel();
 
-        String prompt = """
-        You are an assistant to customer service agents for a prescription fulfillment call center. Given a provided set of activities associated with a specific member, predict the reason they would call into the call center. Include all possible reasons for a call, ordered by likelihood if the percentage of call reasons are the following:
-        Cancelled orders - 50%
-        Closed orders - 21%
-        Booked orders - 19%
-        Entered orders - 10%
-        ##Example##
-        Likely call reason in order of highest likelihood:
-        - [medication name] from date [prescription date] which was canceled
-        - [medication name] from date [prescription date] in Entered state
-        """;
-        
-        // Enable planning
-        InvocationContext invocationContext = new Builder()
-            .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
-            .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
-            .withContextVariableConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
-                .toPromptString(new Gson()::toJson)
-                .build())
-            .build();
+                // Enable planning
+                InvocationContext invocationContext = new Builder()
+                                .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
+                                .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
+                                .withContextVariableConverter(
+                                                ContextVariableTypeConverter.builder(OrderActivities.class)
+                                                                .toPromptString(new Gson()::toJson)
+                                                                .build())
+                                .build();
 
-        List<ChatMessageContent<?>> results;
-        ChatCompletionService chatCompletionService = kernel.getService(
-            ChatCompletionService.class);
-        try {
-            results = chatCompletionService.getChatMessageContentsAsync(
-                prompt, kernel, invocationContext).block();
-            return results.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
+                List<ChatMessageContent<?>> results;
+
+                chatHistory.addSystemMessage("You are a goofball who makes up zany one-liners.");
+
+                ChatCompletionService chatCompletionService = kernel.getService(
+                                ChatCompletionService.class);
+                try {
+                        results = chatCompletionService.getChatMessageContentsAsync(
+                                        chatHistory,
+                                        kernel,
+                                        invocationContext).block();
+
+                        // the results don't contain the rest of the chat history
+                        if (results != null && !results.isEmpty()) {
+                                chatHistory.addAssistantMessage(results.get(0).getContent());
+                        } else {
+                                // we have some problem...!!
+                        }
+
+                        return chatHistory;
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        // we just throw it for now, but we can handle it better... returning already
+                        // built chat history
+                        // with a new messge showing that there was an error
+                        throw e;
+                }
         }
-        return "";
-    }    
 
-    private Kernel InstantiateKernel() throws SemanticKernelException{
-        TokenCredential credential = null;
-        OpenAIAsyncClient client;
+        public String GetSKResult(String prompt) throws SemanticKernelException, ServiceNotFoundException {
 
-        if(config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
-            credential = new ClientSecretCredentialBuilder()
-            .clientId(config.getAzureClientId())
-            .tenantId(config.getAzureTenantId())
-            .clientSecret(config.getAzureClientSecret())            
-            .build();
+                Kernel kernel = InstantiateKernel();
 
-            TokenRequestContext requestContext = new TokenRequestContext().addScopes("https://cognitiveservices.azure.com/.default");
+                // Enable planning
+                InvocationContext invocationContext = new Builder()
+                                .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
+                                .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
+                                .withContextVariableConverter(
+                                                ContextVariableTypeConverter.builder(OrderActivities.class)
+                                                                .toPromptString(new Gson()::toJson)
+                                                                .build())
+                                .build();
 
-            String authToken = "Bearer " + credential.getTokenSync(requestContext).getToken();
-
-            HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
-                context.getHttpRequest().getHeaders().set("projectId", config.getProjectId());
-                context.getHttpRequest().getHeaders().set("Authorization", authToken);
-                return next.process();
-            };
-
-            HttpPipelineBuilder pipelineBuilder = new HttpPipelineBuilder()
-                .policies(customHeaderPolicy);
-
-            HttpPipeline pipeline = pipelineBuilder.build();
-
-            client = new OpenAIClientBuilder()
-            .credential(credential)
-            .endpoint(config.getClientEndpoint())
-            .pipeline(pipeline)
-            .buildAsyncClient();   
-
-
-        } else {
-            var builder = new DefaultAzureCredentialBuilder();
-
-            if (config.getAzureTenantId() != null && !config.getAzureTenantId().isEmpty()) {
-                builder.tenantId(config.getAzureTenantId());
-            }
-
-            credential = builder.build();
-
-            client = new OpenAIClientBuilder()
-            .credential(credential)
-            .endpoint(config.getClientEndpoint())
-            .buildAsyncClient();         
+                List<ChatMessageContent<?>> results;
+                ChatCompletionService chatCompletionService = kernel.getService(
+                                ChatCompletionService.class);
+                try {
+                        results = chatCompletionService.getChatMessageContentsAsync(
+                                        prompt, kernel, invocationContext).block();
+                        return results.toString();
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+                return "";
         }
-        
-        // Create your AI service client
-        ChatCompletionService chatService = OpenAIChatCompletion.builder()
-            .withModelId(config.getModelId())
-            .withOpenAIAsyncClient(client)
-            .build();
-        // Create a plugin (the CallerActivitiesPlugin class is defined separately)
-        KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(), "CallerActivitiesPlugin");
 
-        // Create a kernel with Azure OpenAI chat completion and plugin
-        Kernel.Builder builder = Kernel.builder();
-        builder.withAIService(ChatCompletionService.class, chatService);
-        builder.withPlugin(callerActivitiesPlugin);
-        // Build the kernel
-        Kernel kernel = builder.build();        
+        public String GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
 
-        ContextVariableTypes
-            .addGlobalConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
-                .toPromptString(new Gson()::toJson)
-                .build());
+                Kernel kernel = InstantiateKernel();
 
-        KernelHooks hook = new KernelHooks();
+                String prompt = """
+                                You are an assistant to customer service agents for a prescription fulfillment call center. Given a provided set of activities associated with a specific member, predict the reason they would call into the call center. Include all possible reasons for a call, ordered by likelihood if the percentage of call reasons are the following:
+                                Cancelled orders - 50%
+                                Closed orders - 21%
+                                Booked orders - 19%
+                                Entered orders - 10%
+                                ##Example##
+                                Likely call reason in order of highest likelihood:
+                                - [medication name] from date [prescription date] which was canceled
+                                - [medication name] from date [prescription date] in Entered state
+                                """;
 
-        hook.addPreToolCallHook((context) -> {
-            System.out.println("Pre-tool call hook");
-            return context;
-        });
+                // Enable planning
+                InvocationContext invocationContext = new Builder()
+                                .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
+                                .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
+                                .withContextVariableConverter(
+                                                ContextVariableTypeConverter.builder(OrderActivities.class)
+                                                                .toPromptString(new Gson()::toJson)
+                                                                .build())
+                                .build();
 
-        hook.addPreChatCompletionHook(
-            (context) -> {
-                System.out.println("Pre-chat completion hook");
-                return context;
-            });
+                List<ChatMessageContent<?>> results;
+                ChatCompletionService chatCompletionService = kernel.getService(
+                                ChatCompletionService.class);
+                try {
+                        results = chatCompletionService.getChatMessageContentsAsync(
+                                        prompt, kernel, invocationContext).block();
+                        return results.toString();
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+                return "";
+        }
 
-        hook.addPostChatCompletionHook(
-            (context) -> {
-                System.out.println("Post-chat completion hook");
-                return context;
-            });
+        private Kernel InstantiateKernel() throws SemanticKernelException {
+                TokenCredential credential = null;
+                OpenAIAsyncClient client;
 
-        kernel.getGlobalKernelHooks().addHooks(hook);
+                if (config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
+                        credential = new ClientSecretCredentialBuilder()
+                                        .clientId(config.getAzureClientId())
+                                        .tenantId(config.getAzureTenantId())
+                                        .clientSecret(config.getAzureClientSecret())
+                                        .build();
 
-        return kernel;
-    }
+                        TokenRequestContext requestContext = new TokenRequestContext()
+                                        .addScopes("https://cognitiveservices.azure.com/.default");
+
+                        String authToken = "Bearer " + credential.getTokenSync(requestContext).getToken();
+
+                        HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
+                                context.getHttpRequest().getHeaders().set("projectId", config.getProjectId());
+                                context.getHttpRequest().getHeaders().set("Authorization", authToken);
+                                return next.process();
+                        };
+
+                        HttpPipelineBuilder pipelineBuilder = new HttpPipelineBuilder()
+                                        .policies(customHeaderPolicy);
+
+                        HttpPipeline pipeline = pipelineBuilder.build();
+
+                        client = new OpenAIClientBuilder()
+                                        .credential(credential)
+                                        .endpoint(config.getClientEndpoint())
+                                        .pipeline(pipeline)
+                                        .buildAsyncClient();
+
+                } else {
+                        var builder = new DefaultAzureCredentialBuilder();
+
+                        if (config.getAzureTenantId() != null && !config.getAzureTenantId().isEmpty()) {
+                                builder.tenantId(config.getAzureTenantId());
+                        }
+
+                        credential = builder.build();
+
+                        client = new OpenAIClientBuilder()
+                                        .credential(credential)
+                                        .endpoint(config.getClientEndpoint())
+                                        .buildAsyncClient();
+                }
+
+                // Create your AI service client
+                ChatCompletionService chatService = OpenAIChatCompletion.builder()
+                                .withModelId(config.getModelId())
+                                .withOpenAIAsyncClient(client)
+                                .build();
+                // Create a plugin (the CallerActivitiesPlugin class is defined separately)
+                KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
+                                "CallerActivitiesPlugin");
+
+                // Create a kernel with Azure OpenAI chat completion and plugin
+                Kernel.Builder builder = Kernel.builder();
+                builder.withAIService(ChatCompletionService.class, chatService);
+                builder.withPlugin(callerActivitiesPlugin);
+                // Build the kernel
+                Kernel kernel = builder.build();
+
+                ContextVariableTypes
+                                .addGlobalConverter(ContextVariableTypeConverter.builder(OrderActivities.class)
+                                                .toPromptString(new Gson()::toJson)
+                                                .build());
+
+                KernelHooks hook = new KernelHooks();
+
+                hook.addPreToolCallHook((context) -> {
+                        System.out.println("Pre-tool call hook");
+                        return context;
+                });
+
+                hook.addPreChatCompletionHook(
+                                (context) -> {
+                                        System.out.println("Pre-chat completion hook");
+                                        return context;
+                                });
+
+                hook.addPostChatCompletionHook(
+                                (context) -> {
+                                        System.out.println("Post-chat completion hook");
+                                        return context;
+                                });
+
+                kernel.getGlobalKernelHooks().addHooks(hook);
+
+                return kernel;
+        }
 }
