@@ -16,26 +16,23 @@ import com.microsoft.semantickernel.services.ServiceNotFoundException;
 
 @RestController
 public class SemanticKernelController {
-    
-    @Autowired
-    private AppConfig config;
+    public SemanticKernelController(SemanticKernel kernel, MongoService mongoService) {
+        _kernel = kernel;
+        _mongoService = mongoService;
+    }
 
-    // @GetMapping("/lightstatus")
-    // String test() throws SemanticKernelException, ServiceNotFoundException {
-
-    //     SemanticKernel sk = new SemanticKernel(config);
-    //     return sk.GetSKResult("List the lights and if they are off or on.");
-    // }
+    private SemanticKernel _kernel;
+    private MongoService _mongoService;
     
     @PostMapping("/prompt")
     String replaceEmployee(@RequestBody Prompt prompt) throws SemanticKernelException, ServiceNotFoundException {
-    
-        SemanticKernel sk = new SemanticKernel(config);
-        return sk.GetSKResult(prompt.getPrompt());
+        return _kernel.GetSKResult(prompt.getPrompt());
     }
 
     @PostMapping("/predictReason")
     String predictReason(@RequestBody MemberId memberid) throws SemanticKernelException, ServiceNotFoundException {
+        return _kernel.GetReasons(memberid.GetMemberId());
+    }
     
         SemanticKernel sk = new SemanticKernel(config);
         return sk.GetReasons(memberid.GetMemberId());
