@@ -42,6 +42,17 @@ import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 @Scope("singleton")
 public class SemanticKernel {
         private final Kernel _kernel;
+        private final String getReasonsPrompt = """
+                        You are an assistant to customer service agents for a prescription fulfillment call center. Given a provided set of activities associated with a specific member, predict the reason they would call into the call center. Include all possible reasons for a call, ordered by likelihood if the percentage of call reasons are the following:
+                        Cancelled orders - 50%
+                        Closed orders - 21%
+                        Booked orders - 19%
+                        Entered orders - 10%
+                        ##Example##
+                        Likely call reason in order of highest likelihood:
+                        - [medication name] from date [prescription date] which was canceled
+                        - [medication name] from date [prescription date] in Entered state
+                        """;
 
         public SemanticKernel(AppConfig config) {
                 TokenCredential credential = null;
@@ -203,18 +214,6 @@ public class SemanticKernel {
         }
 
         public String GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
-                String prompt = """
-                                You are an assistant to customer service agents for a prescription fulfillment call center. Given a provided set of activities associated with a specific member, predict the reason they would call into the call center. Include all possible reasons for a call, ordered by likelihood if the percentage of call reasons are the following:
-                                Cancelled orders - 50%
-                                Closed orders - 21%
-                                Booked orders - 19%
-                                Entered orders - 10%
-                                ##Example##
-                                Likely call reason in order of highest likelihood:
-                                - [medication name] from date [prescription date] which was canceled
-                                - [medication name] from date [prescription date] in Entered state
-                                """;
-
                 // Enable planning for automatic tool calling
                 InvocationContext invocationContext = new Builder()
                                 .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
@@ -239,7 +238,7 @@ public class SemanticKernel {
 
                 try {
                         results = chatCompletionService.getChatMessageContentsAsync(
-                                        prompt, _kernel, invocationContext).block();
+                                        getReasonsPrompt, _kernel, invocationContext).block();
                         return results.toString();
                 } catch (Exception e) {
                         e.printStackTrace();
@@ -249,6 +248,8 @@ public class SemanticKernel {
 
         // demonstrates manual function calling for a bespoke deterministic process with
         // summarization of function results
+        // honestly, you woud use this more for unit testing and just use generic code
+        // methodologies for this approach before sending results to the model
         public String processMultipleEntities(int memberId, String claimId)
                         throws SecurityException, ServiceNotFoundException {
                 var getOrderActivitiesFunction = _kernel.getFunction("CallerActivitiesPlugin", "getActivities");
@@ -275,15 +276,22 @@ public class SemanticKernel {
                                 .withVariable("claimId", claimId)
                                 .build();
 
-                //
                 var orderActivities = getOrderActivitiesFunction.invoke(_kernel, getOrderActivitiesFunctionAKernelArgs,
                                 null, invocationContext);
+
+                // you could do some custom stuff here to process the results of the function
+                // you could chain
+
                 var claims = getClaimsFunction.invoke(_kernel, getClaimsFunctionBKernelArgs, null, invocationContext);
 
+                // you could have a more complex process here to combine the results of the two,
+                // if you so chose
                 String combinedJson = new Gson().toJson(orderActivities) + new Gson().toJson(claims);
-                String prompt = "Please summarize the information found in the activities and claims: " + combinedJson;
 
-                var summary = _kernel.invokePromptAsync(prompt, KernelFunctionArguments.builder().build()).block();
+                // you could use the completion service w/ chat history here if you so chose. it
+                // just was extra overhead for this example
+                var summary = _kernel.invokePromptAsync(getReasonsPrompt + "/n" + combinedJson,
+                                KernelFunctionArguments.builder().build()).block();
 
                 return summary.toString();
         }
