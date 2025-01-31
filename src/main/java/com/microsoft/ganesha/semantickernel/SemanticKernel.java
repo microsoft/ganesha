@@ -16,6 +16,7 @@ import com.microsoft.ganesha.config.AppConfig;
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.plugins.CallerActivitiesPlugin;
 import com.microsoft.ganesha.plugins.OrderActivities;
+import com.microsoft.ganesha.plugins.OrderDetailsPlugin;
 import com.microsoft.semantickernel.Kernel;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatCompletion;
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypeConverter;
@@ -161,11 +162,12 @@ public class SemanticKernel {
             .build();
         // Create a plugin (the CallerActivitiesPlugin class is defined separately)
         KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(), "CallerActivitiesPlugin");
-
+        KernelPlugin orderDetailsPlugin = KernelPluginFactory.createFromObject(new OrderDetailsPlugin(), "OrderDetailsPlugin");
         // Create a kernel with Azure OpenAI chat completion and plugin
         Kernel.Builder builder = Kernel.builder();
         builder.withAIService(ChatCompletionService.class, chatService);
-        builder.withPlugin(callerActivitiesPlugin);
+        // builder.withPlugin(callerActivitiesPlugin);
+        builder.withPlugin(orderDetailsPlugin);
         // Build the kernel
         Kernel kernel = builder.build();        
 

@@ -26,6 +26,9 @@ public class AppConfig {
     @Value("${AZURE_PROJECT_ID}")
     private String projectId;
 
+    @Value("${HemiOrderDetailsEndpoint}")
+    private String hemiOrderDetailsEndpoint;
+
     public String getAzureClientKey() {
         return azureClientKey;
     }
@@ -52,5 +55,9 @@ public class AppConfig {
 
     public String getProjectId() {
         return projectId;
+    }
+
+    public String getHemiOrderDetailsEndpoint() {
+        return hemiOrderDetailsEndpoint;
     }
 }
