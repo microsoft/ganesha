@@ -28,6 +28,15 @@ public class AppConfig {
     @Value("${AZURE_PROJECT_ID}")
     private String projectId;
 
+    @Value("${AZURE_COSMOS_CONN_STR}")
+    private String azureCosmosConnString;
+
+    @Value("${AZURE_COSMOS_COLLECTION}")
+    private String azureCosmosCollection;
+
+    @Value("${AZURE_COSMOS_DATABASE}")
+    private String azureCosmosDatabase;
+
     public String getAzureClientKey() {
         return azureClientKey;
     }
@@ -55,4 +64,17 @@ public class AppConfig {
     public String getProjectId() {
         return projectId;
     }
+    
+    public String getAzureCosmosConnString() {
+        return azureCosmosConnString;
+    }
+
+    public String getAzureCosmosCollection() {
+        return azureCosmosCollection;
+    }
+
+    public String getAzureCosmosDatabase() {
+        return azureCosmosDatabase;
+    }
+
 }

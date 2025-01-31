@@ -2,9 +2,6 @@ package com.microsoft.ganesha.models;
 
 import java.time.OffsetDateTime;
 
-import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
-import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
-
 public class DisplayChatMessage {
     private String message;
     private String role;
@@ -39,4 +36,5 @@ public class DisplayChatMessage {
     public void setTime(OffsetDateTime time) {
         this.time = time;
     }
+
 }
