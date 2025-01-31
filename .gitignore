@@ -31,3 +31,5 @@ build/
 
 
 src/main/resources/application-local.yml
+
+logs/servicename.log
