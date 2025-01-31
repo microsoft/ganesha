@@ -17,4 +17,20 @@ Content-Type: application/json
     "memberid": "12345"
 }
 ###
-GET http://localhost:8080/findbyid?param=123
+
+GET http://localhost:8080/getFirst
+
+###
+GET http://localhost:8080/alldocs
+
+###
+GET http://localhost:8080/findbypages?pages=1000
+
+###
+POST  http://localhost:8080/upload
+Content-Type: application/json
+
+{
+    "title": "The Dragon Reborn", 
+    "author": "Robert Jordan", 
+    "pages": 1000}

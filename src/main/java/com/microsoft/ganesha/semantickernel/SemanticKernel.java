@@ -169,12 +169,12 @@ public class SemanticKernel {
 
                         String authToken = "Bearer " + credential.getTokenSync(requestContext).getToken();
 
-            @SuppressWarnings("deprecation")
-            HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
-                context.getHttpRequest().getHeaders().set("projectId", config.getProjectId());
-                context.getHttpRequest().getHeaders().set("Authorization", authToken);
-                return next.process();
-            };
+                        @SuppressWarnings("deprecation")
+                        HttpPipelinePolicy customHeaderPolicy = (context, next) -> {
+                                context.getHttpRequest().getHeaders().set("projectId", config.getProjectId());
+                                context.getHttpRequest().getHeaders().set("Authorization", authToken);
+                                return next.process();
+                        };
 
                         HttpPipelineBuilder pipelineBuilder = new HttpPipelineBuilder()
                                         .policies(customHeaderPolicy);
