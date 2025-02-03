@@ -2,13 +2,10 @@ package com.microsoft.ganesha;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 
-@SpringBootApplication
-@ComponentScan(basePackages = {
-	"com.microsoft.ganesha", 
-	"com.eapi.helper",  
-	"com.eapi.response"})
+@SpringBootApplication(scanBasePackages = "com.microsoft.ganesha")
+@EnableAsync
 public class GaneshaApplication {
 
 	public static void main(String[] args) {

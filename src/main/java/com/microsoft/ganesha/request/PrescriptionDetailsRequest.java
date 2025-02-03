@@ -16,4 +16,40 @@ public class PrescriptionDetailsRequest {
 
     @JsonProperty("patientId")
     private String patientId;
+
+    @JsonProperty("include")
+    private String[] include;
+
+    @JsonProperty("prescriptions")
+    private String[] prescriptions;
+
+    @JsonProperty("includeInactivePatients")
+    private String includeInactivePatients;
+
+    @JsonProperty("includeExpiredPrescriptions")
+    private String includeExpiredPrescriptions;
+
+    @JsonProperty("includeDiscontinuedPrescriptions")
+    private String includeDiscontinuedPrescriptions;
+
+    @JsonProperty("includeRefillablePrescriptions")
+    private String includeRefillablePrescriptions;
+
+    @JsonProperty("includeRenewablePrescriptions")
+    private String includeRenewablePrescriptions;
+
+    @JsonProperty("includeOpenOrderPrescriptions")
+    private String includeOpenOrderPrescriptions;
+
+    @JsonProperty("includeDuplicateGpi")
+    private String includeDuplicateGpi;
+
+    @JsonProperty("includeStudyRx")
+    private String includeStudyRx;
+
+    @JsonProperty("filterPrescriptionTypes")
+    private String filterPrescriptionTypes;
+
+    @JsonProperty("identity")
+    private String identity;
 }

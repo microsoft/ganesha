@@ -14,9 +14,12 @@ import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
 import com.microsoft.ganesha.config.AppConfig;
 import com.microsoft.ganesha.exception.SemanticKernelException;
+import com.microsoft.ganesha.helper.TokenHelper;
 import com.microsoft.ganesha.plugins.CallerActivitiesPlugin;
 import com.microsoft.ganesha.plugins.OrderActivities;
 import com.microsoft.ganesha.plugins.OrderDetailsPlugin;
+import com.microsoft.ganesha.plugins.PrescriptionSearchPlugin;
+import com.microsoft.ganesha.rest.RestClient;
 import com.microsoft.semantickernel.Kernel;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatCompletion;
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypeConverter;
@@ -35,11 +38,14 @@ import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 public class SemanticKernel {
 
     private final AppConfig config;
-
+    private final TokenHelper tokenHelper;
+    private final RestClient restClient;
     
 
-    public SemanticKernel(AppConfig config) {
+    public SemanticKernel(AppConfig config, TokenHelper tokenHelper, RestClient restClient) {
         this.config = config;
+        this.tokenHelper = tokenHelper;
+        this.restClient = restClient;
     }
     
 
@@ -74,15 +80,48 @@ public class SemanticKernel {
         Kernel kernel = InstantiateKernel();
 
         String prompt = """
-        You are an assistant to customer service agents for a prescription fulfillment call center. Given a provided set of activities associated with a specific member, predict the reason they would call into the call center. Include all possible reasons for a call, ordered by likelihood if the percentage of call reasons are the following:
-        Cancelled orders - 50%
-        Closed orders - 21%
-        Booked orders - 19%
-        Entered orders - 10%
-        ##Example##
-        Likely call reason in order of highest likelihood:
-        - [medication name] from date [prescription date] which was canceled
-        - [medication name] from date [prescription date] in Entered state
+            As a call center assistant, your task is to support the service agent by offering a list of likely workflows they may need to assist a member. Pick from the following workflows to answer: 
+
+            View Order: This workflow allows the agent to see the member's orders. 
+            Place Order: This workflow enables the agent to place new orders or refill existing ones. 
+            Manage Prescriptions: This workflow allows the agent to manage both active and inactive prescriptions. 
+            
+            Based on historical member calls, the following reasons for contacting have been noted with their respective likelihoods and how to identify them in format of [Reason, percentage of calls, how to identify the reason]: 
+            
+            [Program education, 23.71%, no home delivery orders in recent history]
+            [Refill, 21.82%, Refill is due (or close to it)]
+            [WISMO(Where is my order?), 5.82%, open order with open order line items]
+            [Pharmacist, 4.11%, call is from a pharmacist]
+            [Web portal help, 1.06%, no identifiable reason]
+            [Out of stock, 0.90%, Open order with one order line item marked as out of stock]
+            
+            ### Instruction ### 
+            
+            Provide the agent with a list of 3 workflows the agent is most likely to use and the reasoning behind the selection of each workflow in 6 words or less, including data that invoked that reasoning. 
+            Order them in order of most likely use to least likely to use.
+            Look at patient's order details and prescriptions to determine the most likely workflows.
+            Also list out the data retrieved from the patient's order details and prescriptions.
+            
+            Desired JSON OBJECT output format:
+            
+             {
+                Workflows[
+                    { 
+                        "workflow": "[workflow name]", 
+                        "Reason": "[reasoning behind picking the workflow]" 
+                    }, 
+                    {
+                        "workflow": "[workflow name]",
+                        "Reason": "[reasoning behind picking the workflow]" 
+                    }, 
+                    { 
+                        "workflow": "[workflow name]",
+                        "Reason": "[reasoning behind picking the workflow]" 
+                    }
+                ]
+             }
+
+             After the JSON output, output the order details as well.
         """;
         
         // Enable planning
@@ -162,12 +201,14 @@ public class SemanticKernel {
             .build();
         // Create a plugin (the CallerActivitiesPlugin class is defined separately)
         KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(), "CallerActivitiesPlugin");
-        KernelPlugin orderDetailsPlugin = KernelPluginFactory.createFromObject(new OrderDetailsPlugin(), "OrderDetailsPlugin");
+        KernelPlugin orderDetailsPlugin = KernelPluginFactory.createFromObject(new OrderDetailsPlugin(this.config, this.tokenHelper, this.restClient), "OrderDetailsPlugin");
+        KernelPlugin PrescriptionSearchPlugin = KernelPluginFactory.createFromObject(new PrescriptionSearchPlugin(this.config, this.tokenHelper, this.restClient), "PrescriptionSearchPlugin");
         // Create a kernel with Azure OpenAI chat completion and plugin
         Kernel.Builder builder = Kernel.builder();
         builder.withAIService(ChatCompletionService.class, chatService);
         // builder.withPlugin(callerActivitiesPlugin);
         builder.withPlugin(orderDetailsPlugin);
+        builder.withPlugin(PrescriptionSearchPlugin);
         // Build the kernel
         Kernel kernel = builder.build();        
 

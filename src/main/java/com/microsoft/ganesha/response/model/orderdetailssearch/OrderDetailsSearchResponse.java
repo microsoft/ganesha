@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.microsoft.ganesha.response.model.common.SearchOutputMetaData;
+
 import lombok.*;
 
 import java.io.Serializable;
@@ -28,5 +30,5 @@ public class OrderDetailsSearchResponse implements Serializable {
     private String patientId;
 
     @JsonProperty(value = "orderDetails")
-    private List<OrderDetailsSearch> orderDetails;;
+    private List<OrderDetailsSearch> orderDetails;
 }
