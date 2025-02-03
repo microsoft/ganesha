@@ -1,7 +1,10 @@
 package com.microsoft.ganesha.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.microsoft.ganesha.response.HemiAccessTokenResponse;
 
 @Configuration
 public class AppConfig {
@@ -25,6 +28,12 @@ public class AppConfig {
 
     @Value("${AZURE_PROJECT_ID}")
     private String projectId;
+
+    @Value("${HemiOrderDetailsEndpoint}")
+    private String hemiOrderDetailsEndpoint;
+
+    @Value("${HemiPrescriptionSearchEndpoint}")
+    private String hemiPrescriptionSearchEndpoint;
 
     public String getAzureClientKey() {
         return azureClientKey;
@@ -53,4 +62,23 @@ public class AppConfig {
     public String getProjectId() {
         return projectId;
     }
+
+    public String getHemiOrderDetailsEndpoint() {
+        return hemiOrderDetailsEndpoint;
+    }
+
+    public String getHemiPrescriptionSearchEndpoint() {
+        return hemiPrescriptionSearchEndpoint;
+    }
+
+    /**
+     * HemiAccessTokenResponse Bean
+     *
+     * @return HemiAccessTokenResponse
+     */
+    @Bean
+    public HemiAccessTokenResponse hemiAccessTokenResponse() {
+        return new HemiAccessTokenResponse();
+    }
+
 }
