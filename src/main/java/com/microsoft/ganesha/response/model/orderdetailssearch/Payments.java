@@ -13,6 +13,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -34,9 +35,9 @@ public class Payments implements Serializable {
     @JsonProperty(value = "paymentDate")
     private String paymentDate;
 
-    @JsonProperty(value = "shipSetId")
-    private String shipSetId;
+    // @JsonProperty(value = "shipSetId")
+    // private String shipSetId;
 
-    @JsonProperty(value = "transactionType")
-    private String transactionType;
+    // @JsonProperty(value = "transactionType")
+    // private String transactionType;
 }

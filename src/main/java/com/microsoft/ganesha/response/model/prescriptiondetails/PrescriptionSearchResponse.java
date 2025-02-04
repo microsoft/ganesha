@@ -9,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,4 +19,5 @@ public class PrescriptionSearchResponse {
 
     @JsonProperty("prescriptions")
     private List<Prescription> prescriptions;
+
 }
