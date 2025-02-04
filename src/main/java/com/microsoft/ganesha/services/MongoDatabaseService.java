@@ -9,6 +9,8 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bson.Document;
@@ -33,7 +35,7 @@ public class MongoDatabaseService implements MongoService {
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
         MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
         Document document = collection.find(Filters.eq("conversationId", conversationId.toString())).first();
-        
+
         if (document != null) {
             // Convert the document to a Conversation object
             return new Conversation(document);
@@ -47,14 +49,14 @@ public class MongoDatabaseService implements MongoService {
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
         MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
 
-        Document document = new Document("conversationId", conversation.getId().toString())
-            .append("messages", conversation.getMessages().stream().map(message -> 
-                new Document("message", message.getMessage())
-                .append("role", message.getRole())
-                .append("time", message.getTime().toInstant())
-            ).toList());
+        Document document = new Document("conversationId", conversation.getConversationId().toString())
+                .append("messages",
+                        conversation.getMessages().stream().map(message -> new Document("message", message.getMessage())
+                                .append("role", message.getRole())
+                                .append("time", message.getTime().toInstant())).toList());
 
-        collection.replaceOne(Filters.eq("conversationId", conversation.getId().toString()), document, new ReplaceOptions().upsert(true));
+        collection.replaceOne(Filters.eq("conversationId", conversation.getConversationId().toString()), document,
+                new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -62,5 +64,14 @@ public class MongoDatabaseService implements MongoService {
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
         MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
         collection.deleteOne(Filters.eq("conversationId", conversationId.toString()));
+    }
+
+    @Override
+    public List<Conversation> GetConversations() throws Exception {
+        MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
+        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
+
+        List<Conversation> conversations = collection.find().map(document -> new Conversation(document)).into(new ArrayList<>());
+        return conversations;
     }
 }
