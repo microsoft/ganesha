@@ -3,10 +3,12 @@ package com.microsoft.ganesha.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import com.microsoft.ganesha.response.HemiAccessTokenResponse;
 
 @Configuration
+@Scope("singleton")
 public class AppConfig {
     @Value("${AZURE_CLIENT_KEY}")
     private String azureClientKey;
@@ -34,6 +36,14 @@ public class AppConfig {
 
     @Value("${HemiPrescriptionSearchEndpoint}")
     private String hemiPrescriptionSearchEndpoint;
+    @Value("${AZURE_COSMOS_CONN_STR}")
+    private String azureCosmosConnString;
+
+    @Value("${AZURE_COSMOS_COLLECTION}")
+    private String azureCosmosCollection;
+
+    @Value("${AZURE_COSMOS_DATABASE}")
+    private String azureCosmosDatabase;
 
     public String getAzureClientKey() {
         return azureClientKey;
@@ -79,6 +89,18 @@ public class AppConfig {
     @Bean
     public HemiAccessTokenResponse hemiAccessTokenResponse() {
         return new HemiAccessTokenResponse();
+    }
+    
+    public String getAzureCosmosConnString() {
+        return azureCosmosConnString;
+    }
+
+    public String getAzureCosmosCollection() {
+        return azureCosmosCollection;
+    }
+
+    public String getAzureCosmosDatabase() {
+        return azureCosmosDatabase;
     }
 
 }
