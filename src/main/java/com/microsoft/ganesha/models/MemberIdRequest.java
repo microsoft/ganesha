@@ -1,9 +1,9 @@
-package com.microsoft.ganesha.semantickernel;
+package com.microsoft.ganesha.models;
 
-public class MemberId {
+public class MemberIdRequest {
     private String memberid;
 
     public String GetMemberId() {
         return this.memberid;
-      }
+    }
 }

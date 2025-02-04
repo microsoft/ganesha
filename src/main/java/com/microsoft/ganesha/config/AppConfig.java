@@ -45,6 +45,16 @@ public class AppConfig {
     @Value("${AZURE_COSMOS_DATABASE}")
     private String azureCosmosDatabase;
 
+    @Value("${mongoServiceName}")
+    private String mongoServiceName;
+
+
+    // @Value("${mongoServiceName:inMemory}")
+    // private String mongoServiceName;
+
+    // @Value("${AZURE_COSMOS_CONN_STR:mongodb+srv://u:p@somecluster.mongocluster.cosmos.azure.com}")
+    // private String azureCosmosConnString;
+
     public String getAzureClientKey() {
         return azureClientKey;
     }
@@ -103,4 +113,7 @@ public class AppConfig {
         return azureCosmosDatabase;
     }
 
+    public String getMongoServiceName() {
+        return mongoServiceName;
+    }
 }

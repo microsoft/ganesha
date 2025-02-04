@@ -1,6 +1,5 @@
 package com.microsoft.ganesha.controller;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,9 +14,11 @@ import com.microsoft.ganesha.rest.RestClient;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
 import com.microsoft.ganesha.models.DisplayChatMessage;
-import com.microsoft.ganesha.semantickernel.MemberId;
-import com.microsoft.ganesha.semantickernel.Prompt;
+import com.microsoft.ganesha.models.MemberIdRequest;
+import com.microsoft.ganesha.models.MulitEntityRequest;
+import com.microsoft.ganesha.models.SimplePromptRequest;
 import com.microsoft.ganesha.semantickernel.SemanticKernel;
+import com.microsoft.ganesha.services.MongoServiceFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 
@@ -32,16 +33,16 @@ public class SemanticKernelController {
     private final SemanticKernel kernel;
 
 
-    public SemanticKernelController(AppConfig config, TokenHelper tokenHelper, RestClient restClient, SemanticKernel kernel, @Qualifier("mongoDatabaseService") MongoService mongoService) {
+    public SemanticKernelController(AppConfig config, TokenHelper tokenHelper, RestClient restClient, SemanticKernel kernel, MongoServiceFactory mongoService) {
         this.config = config;
         this.tokenHelper = tokenHelper;
         this.restClient = restClient;
-        this.mongoService = mongoService;
+        this.mongoService = mongoService.create();
         this.kernel = kernel;
     }
 
     @PostMapping("/prompt")
-    String replaceEmployee(@RequestBody Prompt prompt) throws SemanticKernelException, ServiceNotFoundException {
+    String replaceEmployee(@RequestBody SimplePromptRequest prompt) throws SemanticKernelException, ServiceNotFoundException {
         return kernel.GetSKResult(prompt.getPrompt());
     }
 
@@ -84,7 +85,7 @@ public class SemanticKernelController {
             mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                String reason = kernel.GetReasons(messages.get(0).getMessage(), "test");
+                String reason = kernel.GetReasons(conversation.getPatientId(), conversation.getCorrelationId());
 
                 if (reason != null) {
                     var reasonMessage = new DisplayChatMessage(reason, AuthorRole.ASSISTANT.toString(),
@@ -109,5 +110,19 @@ public class SemanticKernelController {
             // probably mongo service interface needs closer look
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    @PostMapping("/claims")
+    String getClaims(@RequestBody SimplePromptRequest promptRequest)
+            throws SemanticKernelException, ServiceNotFoundException {
+
+        return kernel.getClaims(promptRequest.getPrompt());
+    }
+
+    // exceedingly open to a more thought through use case and naming for this
+    @PostMapping("/processMultipleEntities")
+    String processMultipleEntities(@RequestBody MulitEntityRequest request)
+            throws SemanticKernelException, ServiceNotFoundException {
+        return kernel.processMultipleEntities(request.GetMemberId(), request.getClaimId());
     }
 }

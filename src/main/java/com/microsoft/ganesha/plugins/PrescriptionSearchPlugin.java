@@ -25,16 +25,18 @@ public class PrescriptionSearchPlugin {
         this.restClient = restClient;
     }
 
-    @DefineKernelFunction(name = "getPrescriptions", description = "Gets details of patient's prescriptions which provides information of current prescriptions")
+    @DefineKernelFunction(name = "getPrescriptions", description = "Gets details of patient's prescriptions which provides information of current prescriptions using patientId and correlationId")
     public PrescriptionSearchResponse getPrescriptions(String patientId, String correlationId) {
-
-        String token = tokenHelper.getHemiAccessToken("correlationId");
+        // String token = tokenHelper.getHemiAccessToken("correlationId");
+        String token = tokenHelper.getHemiAccessToken(correlationId);
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         PrescriptionDetailsRequest request = new PrescriptionDetailsRequest();
-        request.setPatientId("124027968");
+        request.setPatientId(patientId);
+        // request.setPatientId("124027968");
+
         request.setInclude(new String[]{"all"});
         request.setPrescriptions(new String[]{});
         request.setIncludeInactivePatients("Y");

@@ -1,9 +1,9 @@
-package com.microsoft.ganesha.semantickernel;
+package com.microsoft.ganesha.models;
 
-public class Prompt {
+public class SimplePromptRequest {
     private String prompt;
 
     public String getPrompt() {
         return this.prompt;
-      }
+    }
 }

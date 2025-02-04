@@ -29,16 +29,18 @@ public class OrderDetailsPlugin {
         this.restClient = restClient;
     }
 
-    @DefineKernelFunction(name = "getOrderDetails", description = "Gets details of orders relating to the caller via patientId")
+    @DefineKernelFunction(name = "getOrderDetails", description = "Gets details of orders relating to the caller using patientId and correlationId")
     public OrderDetailsSearchResponse getOrderDetails(String patientId, String correlationId) {
         
-        String token = tokenHelper.getHemiAccessToken("correlationId");
+        // String token = tokenHelper.getHemiAccessToken("correlationId");
+        String token = tokenHelper.getHemiAccessToken(correlationId);
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         OrderDetailsSearchRequest request = new OrderDetailsSearchRequest();
-        request.setPatientId("124027968");
+        request.setPatientId(patientId);
+        // request.setPatientId("124027968");
         request.setInclude(Arrays.asList("all"));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
