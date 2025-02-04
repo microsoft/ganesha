@@ -1,11 +1,11 @@
 package com.microsoft.ganesha.controller;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
@@ -14,14 +14,16 @@ import com.microsoft.ganesha.models.MemberIdRequest;
 import com.microsoft.ganesha.models.MulitEntityRequest;
 import com.microsoft.ganesha.models.SimplePromptRequest;
 import com.microsoft.ganesha.semantickernel.SemanticKernel;
+import com.microsoft.ganesha.services.MongoServiceFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 
 @RestController
 public class SemanticKernelController {
-    public SemanticKernelController(SemanticKernel kernel, @Qualifier("mongoDatabaseService") MongoService mongoService) {
+    
+    public SemanticKernelController(SemanticKernel kernel, MongoServiceFactory mongoService) {
         _kernel = kernel;
-        _mongoService = mongoService;
+        _mongoService = mongoService.create();
     }
 
     private SemanticKernel _kernel;

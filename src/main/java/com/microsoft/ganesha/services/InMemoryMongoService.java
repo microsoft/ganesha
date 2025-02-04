@@ -17,7 +17,7 @@ public class InMemoryMongoService implements MongoService {
     private static InMemoryMongoService instance;
     private Map<UUID, Conversation> conversations;
 
-    private InMemoryMongoService() {
+    InMemoryMongoService() {
         conversations = new HashMap<>();
     }
 

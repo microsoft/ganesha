@@ -12,20 +12,20 @@ import com.mongodb.client.model.ReplaceOptions;
 import java.util.UUID;
 
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
 @Scope("singleton")
 public class MongoDatabaseService implements MongoService {
-    @Autowired
-    private AppConfig config;
+   
     
     private final MongoClient mongoClient;
+    private final AppConfig config;
 
-    public MongoDatabaseService(MongoClient mongoClient) {
+    public MongoDatabaseService(MongoClient mongoClient, AppConfig config) {
         this.mongoClient = mongoClient;
+        this.config = config;
     }
 
     @Override
