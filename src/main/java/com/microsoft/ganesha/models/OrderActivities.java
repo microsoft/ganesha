@@ -1,7 +1,8 @@
-package com.microsoft.ganesha.plugins;
+package com.microsoft.ganesha.models;
 
 import java.util.List;
 
+// todo: move to models namespace
 public class OrderActivities {
     private int memberId;
     private String medicationName;
@@ -13,7 +14,8 @@ public class OrderActivities {
     private List<String> refillDates;
     private String orderStatus;
 
-    public OrderActivities(int memberId, String medicationName, String dosage, String frequency, String pharmacy, String prescribingDoctor, String prescriptionDate, List<String> refillDates, String orderStatus) {
+    public OrderActivities(int memberId, String medicationName, String dosage, String frequency, String pharmacy,
+            String prescribingDoctor, String prescriptionDate, List<String> refillDates, String orderStatus) {
         this.memberId = memberId;
         this.medicationName = medicationName;
         this.dosage = dosage;

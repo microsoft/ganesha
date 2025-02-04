@@ -10,8 +10,9 @@ import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
 import com.microsoft.ganesha.models.DisplayChatMessage;
-import com.microsoft.ganesha.semantickernel.MemberId;
-import com.microsoft.ganesha.semantickernel.Prompt;
+import com.microsoft.ganesha.models.MemberIdRequest;
+import com.microsoft.ganesha.models.MulitEntityRequest;
+import com.microsoft.ganesha.models.SimplePromptRequest;
 import com.microsoft.ganesha.semantickernel.SemanticKernel;
 import com.microsoft.ganesha.services.MongoServiceFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
@@ -29,12 +30,14 @@ public class SemanticKernelController {
     private MongoService _mongoService;
 
     @PostMapping("/prompt")
-    String replaceEmployee(@RequestBody Prompt prompt) throws SemanticKernelException, ServiceNotFoundException {
+    String replaceEmployee(@RequestBody SimplePromptRequest prompt)
+            throws SemanticKernelException, ServiceNotFoundException {
         return _kernel.GetSKResult(prompt.getPrompt());
     }
 
     @PostMapping("/predictReason")
-    String predictReason(@RequestBody MemberId memberid) throws SemanticKernelException, ServiceNotFoundException {
+    String predictReason(@RequestBody MemberIdRequest memberid)
+            throws SemanticKernelException, ServiceNotFoundException {
         return _kernel.GetReasons(memberid.GetMemberId());
     }
 
@@ -97,5 +100,19 @@ public class SemanticKernelController {
             // probably mongo service interface needs closer look
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    @PostMapping("/claims")
+    String getClaims(@RequestBody SimplePromptRequest promptRequest)
+            throws SemanticKernelException, ServiceNotFoundException {
+
+        return _kernel.getClaims(promptRequest.getPrompt());
+    }
+
+    // exceedingly open to a more thought through use case and naming for this
+    @PostMapping("/processMultipleEntities")
+    String processMultipleEntities(@RequestBody MulitEntityRequest request)
+            throws SemanticKernelException, ServiceNotFoundException {
+        return _kernel.processMultipleEntities(request.GetMemberId(), request.getClaimId());
     }
 }
