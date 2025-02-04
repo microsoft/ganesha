@@ -8,13 +8,9 @@ import com.microsoft.ganesha.response.model.orderdetailssearch.OrderDetailsSearc
 import com.microsoft.ganesha.rest.RestClient;
 import com.microsoft.semantickernel.semanticfunctions.annotations.DefineKernelFunction;
 
-import reactor.core.publisher.Mono;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
 
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -34,15 +30,15 @@ public class OrderDetailsPlugin {
     }
 
     @DefineKernelFunction(name = "getOrderDetails", description = "Gets details of orders relating to the caller via patientId")
-    @Async  
-    public CompletableFuture<OrderDetailsSearchResponse> getOrderDetails(String patientId, String correlationId) {
-        String token = tokenHelper.getHemiAccessToken(correlationId);
+    public OrderDetailsSearchResponse getOrderDetails(String patientId, String correlationId) {
+        
+        String token = tokenHelper.getHemiAccessToken("correlationId");
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         OrderDetailsSearchRequest request = new OrderDetailsSearchRequest();
-        request.setPatientId(patientId);
+        request.setPatientId("124027968");
         request.setInclude(Arrays.asList("all"));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -62,16 +58,18 @@ public class OrderDetailsPlugin {
 
         request.setSearchInputMetaData(searchInputMetaData);
         
-        CompletableFuture<OrderDetailsSearchResponse> result = null;
 
         try {
-            Mono<ResponseEntity<OrderDetailsSearchResponse>> monoResponseEntity = restClient.restPostCall(appConfig.getHemiOrderDetailsEndpoint(), "correlationId", request, headers, OrderDetailsSearchRequest.class, OrderDetailsSearchResponse.class);
-            result = monoResponseEntity.filter(m -> Objects.nonNull(m.getBody())).map(HttpEntity::getBody).toFuture();
-            System.out.println("Getting order details");
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return CompletableFuture.failedFuture(e);        
-        }
+            ResponseEntity<OrderDetailsSearchResponse> responseEntity = restClient
+                .restPostCall(appConfig.getHemiOrderDetailsEndpoint(), "correlationId", request, headers, OrderDetailsSearchRequest.class, OrderDetailsSearchResponse.class)
+                .block();
+            if (responseEntity != null && responseEntity.getBody() != null) { 
+                return responseEntity.getBody();
+            }  
+            } catch (Exception e) {  
+                e.printStackTrace();
+            }  
+
+            return null;  
     }
 }

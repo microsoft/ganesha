@@ -122,54 +122,72 @@ public class SemanticKernel {
                 return "";
         }
 
-        public String GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
+        public String GetReasons(String patientId, String correlationId) throws SemanticKernelException, ServiceNotFoundException {
 
                 Kernel kernel = InstantiateKernel();
 
-                String prompt = """
-                                    As a call center assistant, your task is to support the service agent by offering a list of likely workflows they may need to assist a member. Pick from the following workflows to answer:
+                String prompt = 
+                """                  
+                        As a call center assistant, your task is to help the service agent by analyzing patient data and providing the three most likely workflows they may need to assist a patient. You must choose workflows based on the following list and explain the reasoning behind each selection. 
+                        
+                        patientId = {{patientId}}
+                        correlationId = {{correlationId}}
+                           
+                        #### Available Workflows ####  
+                        1. **View Order**: This workflow allows the agent to see the patient's orders.    
+                        2. **Place Order**: This workflow enables the agent to place new orders or refill existing ones.    
+                        3. **Manage Prescriptions**: This workflow allows the agent to manage both active and inactive prescriptions.    
+                          
+                        #### Common Reasons for Patient Calls ####  
+                        Based on historical call data, patients contact the call center for the following reasons. Each reason includes its likelihood (percentage of calls) and an indicator to identify the reason from the data provided:    
+                        - **Program Education** (23.71%): No home delivery orders in recent history.    
+                        - **Refill** (21.82%): Refill is due (or close to it).    
+                        - **WISMO (Where is my order?)** (5.82%): Open order with open order line items.    
+                        - **Pharmacist** (4.11%): Call is from a pharmacist.    
+                        - **Web Portal Help** (1.06%): No identifiable reason.    
+                        - **Out of Stock** (0.90%): Open order with one order line item marked as out of stock.    
+                          
+                        ### Instruction ###  
+                        Analyze the provided patient data (e.g., order details, prescription history) to determine the top 3 workflows the agent is most likely to use. For each workflow, provide:  
+                        1. The name of the workflow.  
+                        2. A detailed and specific reason for selecting the workflow, referencing **concrete data points** such as order numbers, prescription IDs, medication names, order statuses, refill due dates, and other relevant details.  
+                        
+                        Your reasoning must include **specific examples** using the data provided. For example:  
+                        - "Place Order is most likely to be used because the patient's recent order of Advil (Order ID: A001) was canceled on 2023-10-01, and they may want to reorder it."  
+                        - "View Order is most likely to be used because the patient has an active order (Order ID: A002) for Tylenol that is scheduled for delivery tomorrow."  
+                        - "Manage Prescriptions is most likely to be used because the patient has an inactive prescription for Lipitor (Prescription ID: P123) that needs renewal."  
+                        
+                        Ensure all reasoning references the relevant **order numbers** and **prescription IDs** explicitly.  
+                        
+                        ### Output Format ###  
+                        Return your response ONLY in the following JSON format:  
+                        {  
+                        "Workflows": [  
+                        {  
+                        "workflow": "[workflow name]",  
+                        "Reason": "[detailed and specific reason referencing concrete data points, including order numbers and prescription IDs]"  
+                        },  
+                        {  
+                        "workflow": "[workflow name]",  
+                        "Reason": "[detailed and specific reason referencing concrete data points, including order numbers and prescription IDs]"  
+                        },  
+                        {  
+                        "workflow": "[workflow name]",  
+                        "Reason": "[detailed and specific reason referencing concrete data points, including order numbers and prescription IDs]"  
+                        }  
+                        ]  
+                        }   
+                           
+                        #### Example Data Analysis ####  
+                        - If no home delivery orders exist in the patient's history, "Program Education" is likely the reason for the call, and the "View Order" workflow may be helpful.    
+                        - If a refill is due or close to due, prioritize the "Place Order" workflow.    
+                        - If the patient has an open order with pending line items, "WISMO" is likely the reason, and "View Order" may be the most relevant workflow.    
+                          
+                        #### Additional Notes ####  
+                        - Be sure to tie all reasoning to the data provided.    
+                        - Adhere strictly to the JSON output format; do not include additional text or explanations outside the JSON object.    
 
-                                    View Order: This workflow allows the agent to see the member's orders.
-                                    Place Order: This workflow enables the agent to place new orders or refill existing ones.
-                                    Manage Prescriptions: This workflow allows the agent to manage both active and inactive prescriptions.
-
-                                    Based on historical member calls, the following reasons for contacting have been noted with their respective likelihoods and how to identify them in format of [Reason, percentage of calls, how to identify the reason]:
-
-                                    [Program education, 23.71%, no home delivery orders in recent history]
-                                    [Refill, 21.82%, Refill is due (or close to it)]
-                                    [WISMO(Where is my order?), 5.82%, open order with open order line items]
-                                    [Pharmacist, 4.11%, call is from a pharmacist]
-                                    [Web portal help, 1.06%, no identifiable reason]
-                                    [Out of stock, 0.90%, Open order with one order line item marked as out of stock]
-
-                                    ### Instruction ###
-
-                                    Provide the agent with a list of 3 workflows the agent is most likely to use and the reasoning behind the selection of each workflow in 6 words or less, including data that invoked that reasoning.
-                                    Order them in order of most likely use to least likely to use.
-                                    Look at patient's order details and prescriptions to determine the most likely workflows.
-                                    Also list out the data retrieved from the patient's order details and prescriptions.
-
-                                    Desired JSON OBJECT output format:
-
-                                     {
-                                        Workflows[
-                                            {
-                                                "workflow": "[workflow name]",
-                                                "Reason": "[reasoning behind picking the workflow]"
-                                            },
-                                            {
-                                                "workflow": "[workflow name]",
-                                                "Reason": "[reasoning behind picking the workflow]"
-                                            },
-                                            {
-                                                "workflow": "[workflow name]",
-                                                "Reason": "[reasoning behind picking the workflow]"
-                                            }
-                                        ]
-                                     }
-
-                                     After the JSON output, output the order details as well.
-                                """;
+                """;
 
                 // Enable planning
                 InvocationContext invocationContext = new Builder()
@@ -249,8 +267,8 @@ public class SemanticKernel {
                                 .withOpenAIAsyncClient(client)
                                 .build();
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)
-                KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
-                                "CallerActivitiesPlugin");
+                // KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
+                //                 "CallerActivitiesPlugin");
                 KernelPlugin orderDetailsPlugin = KernelPluginFactory.createFromObject(
                                 new OrderDetailsPlugin(this.config, this.tokenHelper, this.restClient),
                                 "OrderDetailsPlugin");
@@ -261,7 +279,7 @@ public class SemanticKernel {
                 // Create a kernel with Azure OpenAI chat completion and plugin
                 Kernel.Builder builder = Kernel.builder();
                 builder.withAIService(ChatCompletionService.class, chatService);
-                builder.withPlugin(callerActivitiesPlugin);
+                // builder.withPlugin(callerActivitiesPlugin);
                 builder.withPlugin(orderDetailsPlugin);
                 builder.withPlugin(prescriptionSearchPlugin);
                 // Build the kernel

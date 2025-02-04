@@ -14,7 +14,10 @@ POST  http://localhost:8080/predictReason
 Content-Type: application/json
 
 {
-    "memberid": "12345"
+    "patientId": "124027968",
+    "searchInputMetaData" : {
+        "correlationId": "test1234"
+    }
 }
 ###
 

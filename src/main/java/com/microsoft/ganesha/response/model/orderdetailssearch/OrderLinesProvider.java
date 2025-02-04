@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,25 +24,25 @@ public class OrderLinesProvider implements Serializable {
     @JsonProperty(value = "providerId")
     private String providerId;
 
-    @JsonProperty(value = "npi")
-    private String npi;
+    // @JsonProperty(value = "npi")
+    // private String npi;
 
-    @JsonProperty(value = "firstName")
-    private String firstName;
+    // @JsonProperty(value = "firstName")
+    // private String firstName;
 
-    @JsonProperty(value = "middleName")
-    private String middleName;
+    // @JsonProperty(value = "middleName")
+    // private String middleName;
 
-    @JsonProperty(value = "lastName")
-    private String lastName;
+    // @JsonProperty(value = "lastName")
+    // private String lastName;
 
-    @JsonProperty(value = "phone")
-    private String phone;
+    // @JsonProperty(value = "phone")
+    // private String phone;
 
-    @JsonProperty(value = "fax")
-    private String fax;
+    // @JsonProperty(value = "fax")
+    // private String fax;
 
-    @JsonProperty(value = "address")
-    private Address address;
+    // @JsonProperty(value = "address")
+    // private Address address;
 
 }

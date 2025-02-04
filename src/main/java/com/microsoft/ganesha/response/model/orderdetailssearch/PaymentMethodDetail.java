@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -33,34 +34,34 @@ public class PaymentMethodDetail implements Serializable {
     @JsonProperty(value = "bankAccountNumber")
     private String bankAccountNumber;
 
-    @JsonProperty(value = "bankAccountType")
-    private String bankAccountType;
+    // @JsonProperty(value = "bankAccountType")
+    // private String bankAccountType;
 
-    @JsonProperty(value = "cardHolderName")
-    private String cardHolderName;
+    // @JsonProperty(value = "cardHolderName")
+    // private String cardHolderName;
 
-    @JsonProperty(value = "cardType")
-    private String cardType;
+    // @JsonProperty(value = "cardType")
+    // private String cardType;
 
-    @JsonProperty(value = "cardTypeCode")
-    private String cardTypeCode;
+    // @JsonProperty(value = "cardTypeCode")
+    // private String cardTypeCode;
 
-    @JsonProperty(value = "billingId")
-    private String billingId;
+    // @JsonProperty(value = "billingId")
+    // private String billingId;
 
-    @JsonProperty(value = "defaultCard")
-    private String defaultCard;
+    // @JsonProperty(value = "defaultCard")
+    // private String defaultCard;
 
-    @JsonProperty(value = "cardNickName")
-    private String cardNickName;
+    // @JsonProperty(value = "cardNickName")
+    // private String cardNickName;
 
-    @JsonProperty(value = "expiryDate")
-    private String expiryDate;
+    // @JsonProperty(value = "expiryDate")
+    // private String expiryDate;
 
-    @JsonProperty(value = "cardPurpose")
-    private String cardPurpose;
+    // @JsonProperty(value = "cardPurpose")
+    // private String cardPurpose;
 
-    @JsonProperty(value = "cardNumber")
-    private String cardNumber;
+    // @JsonProperty(value = "cardNumber")
+    // private String cardNumber;
 
 }

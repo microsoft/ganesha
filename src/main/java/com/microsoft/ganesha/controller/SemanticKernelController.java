@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.microsoft.ganesha.config.AppConfig;
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.helper.TokenHelper;
+import com.microsoft.ganesha.request.PredictReasonRequest;
 import com.microsoft.ganesha.rest.RestClient;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
@@ -45,8 +46,8 @@ public class SemanticKernelController {
     }
 
     @PostMapping("/predictReason")
-    String predictReason(@RequestBody MemberId memberid) throws SemanticKernelException, ServiceNotFoundException {
-        return kernel.GetReasons(memberid.GetMemberId());
+    String predictReason(@RequestBody PredictReasonRequest request) throws SemanticKernelException, ServiceNotFoundException {
+        return kernel.GetReasons(request.getPatientId(), request.getSearchInputMetaData().getCorrelationId());
     }
 
     @PostMapping("/conversation")
@@ -83,7 +84,7 @@ public class SemanticKernelController {
             mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                String reason = kernel.GetReasons(messages.get(0).getMessage());
+                String reason = kernel.GetReasons(messages.get(0).getMessage(), "test");
 
                 if (reason != null) {
                     var reasonMessage = new DisplayChatMessage(reason, AuthorRole.ASSISTANT.toString(),
