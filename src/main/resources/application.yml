@@ -10,6 +10,7 @@ AZURE_COSMOS_COLLECTION:
 AZURE_COSMOS_DATABASE:
 #Leave blank for in memory 
 mongoServiceName: 
+#Uncomment below to use MongoDB
 #mongoServiceName: mongoDatabaseService
 
 spring:
