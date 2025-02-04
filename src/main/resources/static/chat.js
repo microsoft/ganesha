@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     var currentConversation = {
-        id: null,
+        conversationId: null,
         messages: []
     };
     document.addEventListener('keyup', handleEnter);
@@ -15,6 +15,34 @@ document.addEventListener('DOMContentLoaded', () => {
             await handleSubmit();
         }
     }
+
+    async function startNewConversation() {
+        currentConversation = {
+            conversationId: null,
+            messages: []
+        };
+        displayConversation(currentConversation);
+        const url = new URL(window.location);
+        url.searchParams.delete('conversationId');
+        window.history.pushState({}, '', url);
+    }
+
+    document.getElementById('new-conversation-button').addEventListener('click', startNewConversation);
+
+    document.addEventListener('keydown', (event) => {
+          if (event.ctrlKey && event.shiftKey && event.key === 'Z') {
+                event.preventDefault();
+                startNewConversation();
+          }
+     });
+    document.getElementById('new-conversation-button').addEventListener('click', async () => {
+        currentConversation = {
+            conversationId: null,
+            messages: []
+        };
+        displayConversation(currentConversation);
+    });
+
 
     async function handleSubmit(event) {
         if (event) event.preventDefault();
@@ -32,19 +60,35 @@ document.addEventListener('DOMContentLoaded', () => {
         displayMessage('user', userMessage, new Date());
         displayMessage('assistant', 'thinking...', new Date()); // potentially show a spinner instead
 
-        var updatedConversation = await sendMessageToServer(currentConversation);
+        let isNewConvo = !currentConversation.conversationId;
 
-        currentConversation = updatedConversation;
+        await sendMessageToServer(currentConversation);
 
-        displayConversation(currentConversation.messages);
+        displayConversation(currentConversation);
+        if (isNewConvo) {
+            await loadConversations();
+        }
     }
 
-    function displayConversation(messages) {
+    function displayConversation(conversation) {
+
+        const conversationHeader = document.getElementById('conversation-header');
+        conversationHeader.innerHTML = `
+            <h5 class="mb-0">Ganesha</h5>
+            <h8 class="mb-0">${conversation.conversationId}</h8>
+        `;
+
         const chatMessages = document.getElementById('messages');
         chatMessages.innerHTML = '';
-        messages.forEach(msg => {
+        displayMessage('assistant', 'Please be advised, I am an assistant with access to this chat context. Though I am a robot and not a person, your words are still real. Please use civility in our discourse.', new Date());
+
+        if (!conversation.messages || conversation.messages.length === 0)
+            return;
+
+        for (var i = 0; i < conversation.messages.length; i++) {
+            const msg = conversation.messages[i];
             displayMessage(msg.role, msg.message, msg.time);
-        });
+        };
     }
 
     function displayMessage(role, message, time) {
@@ -66,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         messageContent.appendChild(messageText);
         messageContent.appendChild(messageTime);
-
 
         if (role !== 'user') {
             messageContainer.className = 'd-flex flex-row justify-content-start';
@@ -102,4 +145,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return updatedConversation;
     }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+    }
+
+    async function startConversation() {
+        const conversationId = getQueryVariable('conversationId');
+        if (conversationId) {
+            const response = await fetch(`/conversation/${conversationId}`);
+            const conversation = await response.json();
+            currentConversation = conversation;
+            displayConversation(conversation);
+        }
+    }
+
+
+    async function loadConversations() {
+        const response = await fetch('/conversation');
+        const conversations = await response.json();
+        const conversationsList = document.getElementById('conversations');
+        conversationsList.innerHTML = '';
+
+        for (var i = 0; i < conversations.length; i++) {
+            var conversation = conversations[i];
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+
+            const link = document.createElement('a');
+            link.href = `?conversationId=${conversation.conversationId}`;
+            link.innerText = conversation.conversationId;
+
+            listItem.appendChild(link);
+            conversationsList.appendChild(listItem);
+        }
+
+        if (conversations.length === 0) {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            const span = document.createElement('span');
+            const italicText = document.createElement('i');
+            italicText.innerText = 'No conversations found yet!';
+            span.appendChild(italicText);
+            listItem.appendChild(span);
+            conversationsList.appendChild(listItem);
+        }
+    }
+
+    loadConversations();
+
+    startConversation();
 });
