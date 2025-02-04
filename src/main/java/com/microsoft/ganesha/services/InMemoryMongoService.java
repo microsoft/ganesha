@@ -50,4 +50,11 @@ public class InMemoryMongoService implements MongoService {
             throw new Exception("Conversation not found");
         }
     }
+
+    @Override
+    public List<Conversation> GetConversations() throws Exception {
+        return conversations.values().stream()
+                .map(conversation -> new Conversation(conversation)) // Assuming a copy constructor
+                .collect(Collectors.toUnmodifiableList());
+    }
 }
