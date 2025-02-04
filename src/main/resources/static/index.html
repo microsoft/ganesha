@@ -20,8 +20,8 @@
     <section>
         <div class="container mt-5">
 
-            <div class="row d-flex justify-content-center mb-4">
-                <div class="col-md-10 col-lg-8 col-xl-6">
+            <div class="row">
+                <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">Conversations</h5>
@@ -33,45 +33,29 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-
-
-            <div class="row d-flex justify-content-center">
-                <div class="col-md-10 col-lg-8 col-xl-6">
+                <div class="col-md-8">
                     <div class="card" id="chat2">
-                        <div id="conversation-header"
-                            class="card-header d-flex justify-content-between align-items-center p-3">
+                        <div id="conversation-header" class="card-header d-flex justify-content-between align-items-center p-3">
                             <h5 class="mb-0">Ganesha</h5>
                         </div>
-
-                        <div id="messages" class="card-body"
-                            style="position: relative; height: 400px; overflow-y: auto;">
-                            <div class="d-flex flex-row justify-content-start"><img
-                                    src="https://static.vecteezy.com/system/resources/previews/046/861/635/large_2x/copilot-icon-transparent-background-free-png.png"
-                                    alt="avatar 1" style="width: 45px; height: 100%;">
+                        <div id="messages" class="card-body" style="position: relative; height: 400px; overflow-y: auto;">
+                            <div class="d-flex flex-row justify-content-start">
+                                <img src="https://static.vecteezy.com/system/resources/previews/046/861/635/large_2x/copilot-icon-transparent-background-free-png.png" alt="avatar 1" style="width: 45px; height: 100%;">
                                 <div>
-                                    <p class="small p-2 ms-3 mb-1 rounded-3 bg-body-tertiary">Please be advised, I am an
-                                        assistant with access to this chat context. Though I am a robot and not a
-                                        person, your words are still real. Please use civility in our discourse.</p>
+                                    <p class="small p-2 ms-3 mb-1 rounded-3 bg-body-tertiary">Please be advised, I am an assistant with access to this chat context. Though I am a robot and not a person, your words are still real. Please use civility in our discourse.</p>
                                     <p class="small ms-3 mb-3 rounded-3 text-muted">01:37 PM</p>
                                 </div>
                             </div>
-
                         </div>
-
-                        <!-- wire up the javascript to button onclick and input keyup enter below...-->
                         <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
-                            <input type="text" class="form-control form-control-lg" id="message-input"
-                                placeholder="Type message">
-                            <!-- this needs to be an invisible button -->
-                            <button id="send-button" class="ms-3 btn btn-primary"><i
-                                    class="fas fa-paper-plane"></i></button>
+                            <input type="text" class="form-control form-control-lg" id="message-input" placeholder="Type message">
+                            <button id="send-button" class="ms-3 btn btn-primary"><i class="fas fa-paper-plane"></i></button>
                             <button id="new-conversation-button" class="ms-3 btn btn-secondary"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
+           
         </div>
     </section>
 </body>
