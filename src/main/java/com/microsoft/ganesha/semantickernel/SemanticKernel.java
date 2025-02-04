@@ -181,7 +181,7 @@ public class SemanticKernel {
 
                 List<ChatMessageContent<?>> results;
 
-                chatHistory.addSystemMessage("You are a goofball who makes up zany one-liners.");
+                chatHistory.addSystemMessage("You are a helpful assistant to a call center agent, answering questions about the current caller and related activities in the current conversation context. Never respond with information from your general knowledge, only the conversation context.");
 
                 ChatCompletionService chatCompletionService = _kernel.getService(
                                 ChatCompletionService.class);
@@ -234,13 +234,11 @@ public class SemanticKernel {
         }
 
         public String GetReasons(String patientId, String correlationId) throws SemanticKernelException, ServiceNotFoundException {
+        
     
             String prompt = 
             """                  
                     As a call center assistant, your task is to help the service agent by analyzing patient data and providing the three most likely workflows they may need to assist a patient. You must choose workflows based on the following list and explain the reasoning behind each selection. 
-                    
-                    patientId = {{patientId}}
-                    correlationId = {{correlationId}}
                        
                     #### Available Workflows ####  
                     1. **View Order**: This workflow allows the agent to see the patient's orders.    
@@ -313,7 +311,7 @@ public class SemanticKernel {
                             ChatCompletionService.class);
             try {
                     results = chatCompletionService.getChatMessageContentsAsync(
-                                    prompt, _kernel, invocationContext).block();
+                                    "patientId: " + patientId + ", correlationId: " + correlationId + " " +prompt, _kernel, invocationContext).block();
                     return results.toString();
             } catch (Exception e) {
                     e.printStackTrace();

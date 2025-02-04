@@ -66,6 +66,8 @@ public class SemanticKernelController {
 
             if (conversationId == null) {
                 conversationDoesNotExist = true;
+                conversation.setId(java.util.UUID.randomUUID());
+
             } else {
                 try {
                     var dbConversation = mongoService.GetConversation(conversationId);
@@ -74,10 +76,6 @@ public class SemanticKernelController {
                 } catch (Exception e) {
                     conversationDoesNotExist = true;
                 }
-            }
-
-            if (conversationDoesNotExist) {
-                conversation.setId(java.util.UUID.randomUUID());
             }
 
             // add latest message in conversation to db or if convo doesn't exist, make it
