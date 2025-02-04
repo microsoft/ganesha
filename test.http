@@ -41,3 +41,12 @@ Content-Type: application/json
     }
   ]
 }
+
+###
+GET http://localhost:8080/conversation
+
+###
+GET http://localhost:8080/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d
+
+###
+DELETE http://localhost:8080/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d

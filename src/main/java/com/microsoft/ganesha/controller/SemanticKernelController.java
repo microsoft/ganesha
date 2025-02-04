@@ -1,11 +1,21 @@
 package com.microsoft.ganesha.controller;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.azure.core.annotation.Delete;
+import com.azure.core.annotation.Get;
+import com.azure.core.annotation.PathParam;
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
@@ -20,7 +30,6 @@ import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 
 @RestController
 public class SemanticKernelController {
-    
     public SemanticKernelController(SemanticKernel kernel, MongoServiceFactory mongoService) {
         _kernel = kernel;
         _mongoService = mongoService.create();
@@ -41,24 +50,60 @@ public class SemanticKernelController {
         return _kernel.GetReasons(memberid.GetMemberId());
     }
 
+    @GetMapping("/conversation")
+    List<Conversation> getConversations(
+            @RequestParam(value = "expanded", required = false, defaultValue = "false") boolean expanded)
+            throws ServiceNotFoundException {
+        try {
+            var conversations = _mongoService.GetConversations();
+
+            if (!expanded) {
+                for (var conversation : conversations) {
+                    conversation.setMessages(null);
+                }
+            }
+
+            return conversations;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @GetMapping("/conversation/{conversationId}")
+    Conversation getConversation(@PathVariable("conversationId") UUID conversationId) throws ServiceNotFoundException {
+        try {
+            return _mongoService.GetConversation(conversationId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/conversation/{conversationId}")
+    void deleteConversation(@PathVariable("conversationId") UUID conversationId) throws ServiceNotFoundException {
+        try {
+            _mongoService.DeleteConversation(conversationId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
     @PostMapping("/conversation")
     Conversation conversation(@RequestBody Conversation conversation)
             throws SemanticKernelException, ServiceNotFoundException {
         try {
-            var conversationId = conversation.getId();
-            var messages = conversation.getMessages();
 
-            if (messages == null || messages.isEmpty()) {
+            if (conversation.getMessages() == null || conversation.getMessages().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Conversation messages cannot be empty");
             }
 
             var conversationDoesNotExist = true;
 
-            if (conversationId == null) {
+            if (conversation.getConversationId() == null) {
                 conversationDoesNotExist = true;
+                conversation.setConversationId(java.util.UUID.randomUUID());
             } else {
                 try {
-                    var dbConversation = _mongoService.GetConversation(conversationId);
+                    var dbConversation = _mongoService.GetConversation(conversation.getConversationId());
 
                     conversationDoesNotExist = dbConversation == null;
                 } catch (Exception e) {
@@ -66,16 +111,12 @@ public class SemanticKernelController {
                 }
             }
 
-            if (conversationDoesNotExist) {
-                conversation.setId(java.util.UUID.randomUUID());
-            }
-
             // add latest message in conversation to db or if convo doesn't exist, make it
             // so
             _mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                String reason = _kernel.GetReasons(messages.get(0).getMessage());
+                String reason = _kernel.GetReasons(conversation.getMessages().get(0).getMessage());
 
                 if (reason != null) {
                     var reasonMessage = new DisplayChatMessage(reason, AuthorRole.ASSISTANT.toString(),
@@ -88,7 +129,7 @@ public class SemanticKernelController {
 
                 // right now this constructor filters out tool and system messages
                 // we may want to consider if we want to persist them for transparency?
-                conversation = new Conversation(chatHistory);
+                conversation = new Conversation(conversation.getConversationId(), chatHistory);
             }
 
             // now make sure that completion is persisted
