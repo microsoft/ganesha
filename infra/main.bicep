@@ -14,25 +14,10 @@ param principalId string = ''
 
 param serviceName string = 'api'
 
-@description('The MongoDB username to use for the cluster')
-param mongodbUsername string = 'Admin001'
-
-@description('The MongoDB password to use for the cluster')
-@secure()
-param mongodbPassword string = ''
-
-@description('The name of the MongoDB database')
-param mongodbDatabaseName string = 'ganeshadb'
-
-@description('The name of the MongoDB collection')
-param mongodbCollectionName string = 'chathistory'
-
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var storageAccountName = '${abbrs.storageStorageAccounts}${resourceToken}'
 var cognitiveAccountName = '${abbrs.cognitiveServicesAccounts}${resourceToken}'
-var mongoClusterName = '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-var containerRegistryName = '${abbrs.containerRegistryRegistries}${resourceToken}'
 
 var tags = {
   'azd-env-name': environmentName
@@ -72,49 +57,34 @@ module cognitive 'modules/cognitive/cognitive.bicep' = {
     tags: tags
     accountName: cognitiveAccountName
     deployments: [
-      {
-        name: 'chat'
-        model: {
-          format: 'OpenAI'
-          name: 'gpt-4o'
-          version: '2024-08-06'
-        }
-        capacity: 30
-      }
-      {
-        name: 'embedding'
-        model: {
-          format: 'OpenAI'
-          name: 'text-embedding-ada-002'
-          version: '2'
-        }
-        capacity: 30
-      }
-    ]
+	  {
+		name: 'chat'
+		model: {
+		  format: 'OpenAI'
+		  name: 'gpt-4o'
+		  version: '2024-08-06'
+		}
+		capacity: 30
+	  }
+	  {
+		name: 'embedding'
+		model: {
+		  format: 'OpenAI'
+		  name: 'text-embedding-ada-002'
+		  version: '2'
+		}
+		capacity: 30
+	  }
+	]
   }
 }
 
-module mongoCluster 'br/public:avm/res/document-db/mongo-cluster:0.1.1' = {
-  name: 'mongoClusterDeployment'
-  scope: resourceGroup(rg.name)
-  params: {
-    // Required parameters
-    administratorLogin: mongodbUsername
-    administratorLoginPassword: mongodbPassword
-    name: mongoClusterName
-    nodeCount: 1
-    sku: 'M25'
-    storage: 32
-    // Non-required parameters
-    location: location
-  }
-}
-
+// This is obsolete and will be removed in a future release
 module containerRegistry 'br/public:avm/res/container-registry/registry:0.5.1' = {
   name: 'container-registry'
   scope: resourceGroup(rg.name)
   params: {
-    name: containerRegistryName
+    name: 'containerreg${resourceToken}'
     location: location
     tags: tags
     acrAdminUserEnabled: false
@@ -169,7 +139,7 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
     environmentResourceId: containerAppsEnvironment.outputs.resourceId
     location: location
     tags: union(tags, { 'azd-service-name': serviceName })
-    ingressTargetPort: 8080
+    ingressTargetPort: 8951
     ingressExternal: true
     ingressTransport: 'auto'
     stickySessionsAffinity: 'sticky'
@@ -193,10 +163,6 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           name: 'user-assigned-managed-identity-client-id'
           value: managedIdentity.outputs.clientId
         }
-        {
-          name: 'azure-cosmos-connection-string'
-          value: mongoCluster.outputs.connectionStringKey
-        }
       ]
     }
     containers: [
@@ -209,16 +175,12 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
         }
         env: [
           {
-            name: 'AZURE_CLIENT_ID'
+            name: 'UaisAzureClientId'
             secretRef: 'user-assigned-managed-identity-client-id'
-          }
-          {
-            name: 'AZURE_COSMOS_CONN_STR'
-            secretRef: 'azure-cosmos-connection-string'
           }
         ]
       }
-    ]
+    ]    
   }
 }
 

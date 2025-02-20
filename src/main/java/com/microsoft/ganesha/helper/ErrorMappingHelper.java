@@ -4,8 +4,8 @@ import com.microsoft.ganesha.response.DownstreamErrorResponse;
 import com.microsoft.ganesha.response.ErrorResponse;
 import com.microsoft.ganesha.utils.JSONUtil;
 
-// import org.apache.logging.log4j.LogManager;
-// import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Component
 public class ErrorMappingHelper {
 
-//     private final Logger logger = LogManager.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(this.getClass());
 
     /**
      * Method maps ErrorResponse
@@ -29,7 +29,7 @@ public class ErrorMappingHelper {
     public ErrorResponse mapErrorObject(
             String correlationId, String uri, ClientResponse response, Object error) {
 
-        // logger.info("Mapping Error RestClient.mapErrorObject for request correlation id :: {}", correlationId);
+        logger.info("Mapping Error RestClient.mapErrorObject for request correlation id :: {}", correlationId);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -70,7 +70,7 @@ public class ErrorMappingHelper {
             errorResponse.setErrorBody(errObj);
         }
 
-        // logger.info("Returning error response from RestClient.mapErrorObject");
+        logger.info("Returning error response from RestClient.mapErrorObject");
 
         return errorResponse;
     }

@@ -31,9 +31,4 @@ build/
 
 
 src/main/resources/application-local.yml
-
-logs/servicename.log
-.vs/
-
-__blobstorage__
-__queuestorage__
+*application-local.yml

@@ -237,63 +237,49 @@ public class SemanticKernel {
         
     
             String prompt = 
-            """                  
-                    As a call center assistant, your task is to help the service agent by analyzing patient data and providing the three most likely workflows they may need to assist a patient. You must choose workflows based on the following list and explain the reasoning behind each selection. 
-                       
-                    #### Available Workflows ####  
-                    1. **View Order**: This workflow allows the agent to see the patient's orders.    
-                    2. **Place Order**: This workflow enables the agent to place new orders or refill existing ones.    
-                    3. **Manage Prescriptions**: This workflow allows the agent to manage both active and inactive prescriptions.    
-                      
-                    #### Common Reasons for Patient Calls ####  
-                    Based on historical call data, patients contact the call center for the following reasons. Each reason includes its likelihood (percentage of calls) and an indicator to identify the reason from the data provided:    
-                    - **Program Education** (23.71%): No home delivery orders in recent history.    
-                    - **Refill** (21.82%): Refill is due (or close to it).    
-                    - **WISMO (Where is my order?)** (5.82%): Open order with open order line items.    
-                    - **Pharmacist** (4.11%): Call is from a pharmacist.    
-                    - **Web Portal Help** (1.06%): No identifiable reason.    
-                    - **Out of Stock** (0.90%): Open order with one order line item marked as out of stock.    
-                      
-                    ### Instruction ###  
-                    Analyze the provided patient data (e.g., order details, prescription history) to determine the top 3 workflows the agent is most likely to use. For each workflow, provide:  
-                    1. The name of the workflow.  
-                    2. A detailed and specific reason for selecting the workflow, referencing **concrete data points** such as order numbers, prescription IDs, medication names, order statuses, refill due dates, and other relevant details.  
-                    
-                    Your reasoning must include **specific examples** using the data provided. For example:  
-                    - "Place Order is most likely to be used because the patient's recent order of Advil (Order ID: A001) was canceled on 2023-10-01, and they may want to reorder it."  
-                    - "View Order is most likely to be used because the patient has an active order (Order ID: A002) for Tylenol that is scheduled for delivery tomorrow."  
-                    - "Manage Prescriptions is most likely to be used because the patient has an inactive prescription for Lipitor (Prescription ID: P123) that needs renewal."  
-                    
-                    Ensure all reasoning references the relevant **order numbers** and **prescription IDs** explicitly.  
-                    
-                    ### Output Format ###  
-                    Return your response ONLY in the following JSON format:  
-                    {  
-                    "Workflows": [  
-                    {  
-                    "workflow": "[workflow name]",  
-                    "Reason": "[detailed and specific reason referencing concrete data points, including order numbers and prescription IDs]"  
-                    },  
-                    {  
-                    "workflow": "[workflow name]",  
-                    "Reason": "[detailed and specific reason referencing concrete data points, including order numbers and prescription IDs]"  
-                    },  
-                    {  
-                    "workflow": "[workflow name]",  
-                    "Reason": "[detailed and specific reason referencing concrete data points, including order numbers and prescription IDs]"  
-                    }  
-                    ]  
-                    }   
-                       
-                    #### Example Data Analysis ####  
-                    - If no home delivery orders exist in the patient's history, "Program Education" is likely the reason for the call, and the "View Order" workflow may be helpful.    
-                    - If a refill is due or close to due, prioritize the "Place Order" workflow.    
-                    - If the patient has an open order with pending line items, "WISMO" is likely the reason, and "View Order" may be the most relevant workflow.    
-                      
-                    #### Additional Notes ####  
-                    - Be sure to tie all reasoning to the data provided.    
-                    - Adhere strictly to the JSON output format; do not include additional text or explanations outside the JSON object.    
-    
+            """
+                As a call center assistant, your task is to help the service agent by analyzing patient data and providing the three most likely workflows they may need to assist a patient. Based on the available workflows and common reasons for patient calls, select the top three workflows and provide a detailed and specific reason for each selection, referencing concrete data points such as order numbers, prescription IDs, medication names, order statuses, refill due dates, and other relevant details.  
+        
+                ### Available Workflows ###  
+                1. **View Order**: Allows the agent to see the patient's orders.  
+                2. **Place Order**: Enables the agent to place orders for prescriptions that are ready to be refilled.
+                3. **Manage Prescriptions**: Allows the agent to see ACTIVE prescriptions and their order statuses for Optum Home Delivery. Data from prescription search should be used for this workflow.  
+                
+                ### Common Reasons for Patient Calls ###  
+                - **Program Education** (23.71%): No home delivery orders in recent history.  
+                - **Refill** (21.82%): Refill is due (or close to it).  
+                - **WISMO (Where is my order?)** (5.82%): Open order with open order line items.   
+                - **Out of Stock** (0.90%): Open order with one order line item marked as out of stock. 
+                
+                ## Data regarding if calls are for PBM or Pharmacy ##
+                - **PBM** (7.42%): Recent rejected claim.  
+                - **PBM** (4.96%): Open prior authorization on order line item.  
+                - **PBM** (3.04%): Recent fill, not time for a refill yet.  
+                - **PBM** (2.41%): When providing the pharmacy information regarding how to process a claim.  
+                - **Pharmacy** (21.82%): Refill is due (or close to it).  
+                - **Pharmacy** (5.82%): Open order with open order line items.  
+                - **Pharmacy** (4.11%): Call is from a pharmacist.  
+                - **Pharmacy** (3.26%): Order requires payment update.  
+                - **Pharmacy** (0.90%): Open order with one order line item marked as out of stock.
+                
+                ### Instruction ###  
+                Analyze the provided patient data to determine the top 3 workflows the agent is most likely to use. For each workflow, provide:  
+                1. The name of the workflow. THESE WORKFLOWS SHOULD ONLY BE SELECTED FROM THE AVAILABLE WORKFLOWS LISTED ABOVE. 
+                2. A detailed and specific reason for selecting the workflow, referencing concrete data points such as order numbers and prescription IDs.  
+                
+                Ensure all reasoning references the relevant order numbers and prescription IDs explicitly.
+                Order the workflows from most likely to least likely.
+
+                Also at the end of response with workflows, provide a guess on if the call is regarding PBM or Pharmacy. Then provide the reasoning afterwards with specific data
+                
+                ### Output Format ###  
+                Return your response in plain text format using pipes as delimiters. 
+                For EXAMPLE:  
+                "View Order|[Description of the patient's active order, its current status, and any actions or clarifications required.]|Place Order|[Description of a discontinued or refillable prescription, including potential next steps for the patient.]|Manage Prescriptions|[Description of multiple prescriptions that cannot be refilled or renewed, along with the reasons for these issues.]|Pharmacy|[Guess for Pharmacy or PBM, and reasoning for thinking call is for Pharmacy and specific data to support this reasoning.]"                  
+                
+                ### Additional Notes ###  
+                - Be sure to tie all reasoning to the data provided.  
+                - Do not include additional text or explanations outside the specified format.
             """;
     
             // Enable planning

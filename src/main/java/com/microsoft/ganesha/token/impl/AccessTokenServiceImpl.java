@@ -8,8 +8,8 @@ import com.microsoft.ganesha.response.ErrorResponse;
 import com.microsoft.ganesha.response.HemiAccessTokenResponse;
 import com.microsoft.ganesha.rest.RestClient;
 import com.microsoft.ganesha.token.AccessTokenService;
-// import org.apache.logging.log4j.LogManager;
-// import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ import java.util.Optional;
 @Service
 public class AccessTokenServiceImpl implements AccessTokenService {
 
-    // private final Logger logger = LogManager.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(this.getClass());
 
     @Autowired
     private RestClient restClient;
@@ -33,7 +33,7 @@ public class AccessTokenServiceImpl implements AccessTokenService {
 
     @Override
     public HemiAccessTokenResponse getHemiAccessToken(String correlationId) {
-        // logger.info("Inside getHemiAccessToken() calling hemi token generation API");
+        logger.info("Inside getHemiAccessToken() calling hemi token generation API");
         HemiAccessTokenResponse token = null;
 
         try {
@@ -49,8 +49,8 @@ public class AccessTokenServiceImpl implements AccessTokenService {
             }
 
         } catch (RuntimeRestClientErrorException ex) {
-            // logger.error("Runtime Client Error exception encountered inside getHemiAccessToken(), "
-            //         + "Error Message :: {}", ex.getErrorResponse());
+            logger.error("Runtime Client Error exception encountered inside getHemiAccessToken(), "
+                    + "Error Message :: {}", ex.getErrorResponse());
 
             ex.getErrorResponse().setErrorMessage(
                     String.format(APIConstants.EXCEPTION_OCCURRED_MSG, this.getClass().getCanonicalName(),
@@ -59,8 +59,8 @@ public class AccessTokenServiceImpl implements AccessTokenService {
             throw new RuntimeRestClientErrorException(ex.getErrorResponse());
 
         } catch (Exception ex) {
-            // logger.error("Error encountered inside getHemiAccessToken(), Error Message :: {}, "
-            //         + "Exception :: {}", ex.getMessage(), ex);
+            logger.error("Error encountered inside getHemiAccessToken(), Error Message :: {}, "
+                    + "Exception :: {}", ex.getMessage(), ex);
 
             ErrorResponse errorResponse = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())

@@ -5,8 +5,8 @@ import com.microsoft.ganesha.response.ErrorResponse;
 import com.microsoft.ganesha.utils.JSONUtil;
 
 import org.json.JSONObject;
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ import java.util.Optional;
 @RestControllerAdvice
 public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
-//     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionHandlerAdvice.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionHandlerAdvice.class);
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -33,7 +33,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
         String correlationId = new JSONObject(reqStr).getJSONObject("searchInputMetaData")
                 .get("correlationId").toString();
 
-        // LOGGER.error("MethodArgumentNotValidException thrown due to bad request received from with Status code {}", ex.getStatusCode());
+        LOGGER.error("MethodArgumentNotValidException thrown due to bad request received from with Status code {}", ex.getStatusCode());
 
         Optional<String> opObj = ex.getBindingResult().getAllErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -54,7 +54,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(CustomWebClientException.class)
     public ResponseEntity<Object> handleCustomWebClientException(CustomWebClientException exception) {
-        // LOGGER.error("CustomWebClientException occurred :: {}", exception.getMessage());
+        LOGGER.error("CustomWebClientException occurred :: {}", exception.getMessage());
         return new ResponseEntity<>(
                 exception.getErrorResponse(),
                 HttpStatusCode.valueOf(exception.getErrorResponse().getErrorStatus())

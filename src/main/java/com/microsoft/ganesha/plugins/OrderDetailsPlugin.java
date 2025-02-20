@@ -32,7 +32,6 @@ public class OrderDetailsPlugin {
     @DefineKernelFunction(name = "getOrderDetails", description = "Gets details of orders relating to the caller using patientId and correlationId")
     public OrderDetailsSearchResponse getOrderDetails(String patientId, String correlationId) {
         
-        // String token = tokenHelper.getHemiAccessToken("correlationId");
         String token = tokenHelper.getHemiAccessToken(correlationId);
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -40,7 +39,6 @@ public class OrderDetailsPlugin {
 
         OrderDetailsSearchRequest request = new OrderDetailsSearchRequest();
         request.setPatientId(patientId);
-        // request.setPatientId("124027968");
         request.setInclude(Arrays.asList("all"));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -63,7 +61,7 @@ public class OrderDetailsPlugin {
 
         try {
             ResponseEntity<OrderDetailsSearchResponse> responseEntity = restClient
-                .restPostCall(appConfig.getHemiOrderDetailsEndpoint(), "correlationId", request, headers, OrderDetailsSearchRequest.class, OrderDetailsSearchResponse.class)
+                .restPostCall(appConfig.getHemiOrderDetailsEndpoint(), correlationId, request, headers, OrderDetailsSearchRequest.class, OrderDetailsSearchResponse.class)
                 .block();
             if (responseEntity != null && responseEntity.getBody() != null) { 
                 return responseEntity.getBody();

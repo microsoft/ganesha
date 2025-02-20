@@ -10,7 +10,7 @@ import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
 import org.bson.Document;
 
 public class Conversation {
-    private UUID id;
+    private UUID conversationId;
     private List<DisplayChatMessage> messages;
     private String patientId;
     private String correlationId;
@@ -18,15 +18,23 @@ public class Conversation {
     public Conversation() {
     }
 
-    public Conversation(UUID id, String patientId, String correlationId, List<DisplayChatMessage> messages) {
-        this.id = id;
+    public Conversation(Conversation conversation) {
+        this.conversationId = conversation.conversationId;
+        this.messages = new ArrayList<>();
+        for (DisplayChatMessage message : conversation.messages) {
+            this.messages.add(new DisplayChatMessage(message));
+        }
+    }
+
+    public Conversation(UUID conversationId, List<DisplayChatMessage> messages) {
+        this.conversationId = conversationId;
         this.messages = messages;
         this.patientId = patientId;
         this.correlationId = correlationId;
     }
 
-    public Conversation(ChatHistory chatHistory) {
-        this.id = UUID.randomUUID();
+    public Conversation(UUID conversationId, ChatHistory chatHistory) {
+        this.conversationId = conversationId;
         messages = chatHistory
                 .getMessages()
                 .stream()
@@ -46,24 +54,23 @@ public class Conversation {
     }
 
     public Conversation(Document document) {
-        this.id = UUID.fromString(document.getString("conversationId"));
+        this.conversationId = UUID.fromString(document.getString("conversationId"));
         List<Document> messageDocs = document.getList("messages", Document.class);
         this.messages = new ArrayList<>();
         for (Document messageDoc : messageDocs) {
             this.messages.add(new DisplayChatMessage(
-                messageDoc.getString("message"),
-                messageDoc.getString("role"),
-                messageDoc.getDate("time").toInstant().atOffset(java.time.ZoneOffset.UTC)
-            ));
+                    messageDoc.getString("message"),
+                    messageDoc.getString("role"),
+                    messageDoc.getDate("time").toInstant().atOffset(java.time.ZoneOffset.UTC)));
         }
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getConversationId() {
+        return conversationId;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setConversationId(UUID conversationId) {
+        this.conversationId = conversationId;
     }
 
     public List<DisplayChatMessage> getMessages() {

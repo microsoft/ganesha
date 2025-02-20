@@ -3,6 +3,8 @@ package com.microsoft.ganesha.rest;
 import com.microsoft.ganesha.constant.APIConstants;
 import com.microsoft.ganesha.exception.RuntimeRestClientErrorException;
 import com.microsoft.ganesha.exception.RuntimeRestServerErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.microsoft.ganesha.helper.ErrorMappingHelper;
 import com.microsoft.ganesha.response.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class RestClient {
 
-    // private final Logger logger = LogManager.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ErrorMappingHelper errorMappingHelper;
@@ -43,13 +45,13 @@ public class RestClient {
     public <T, K> Mono<ResponseEntity<K>> restPostCall(
             String uri, String reqId, T reqBody, HttpHeaders httpHeaders, Class<T> reqType, Class<K> resType) {
 
-        // logger.info("Inside restPostCall for making post api call having request correlation id - {}", reqId);
+        logger.info("Inside restPostCall for making post api call having request correlation id - {}", reqId);
 
         return this.webClient.post().uri(uri)
                 .headers(header -> header.addAll(httpHeaders))
                 .body(Mono.just(reqBody), reqType).retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, response -> {
-                    // logger.error("Client error received inside RestClient.postRestCall method");
+                    logger.error("Client error received inside RestClient.postRestCall method");
         
                     return response.bodyToMono(Object.class).flatMap(e -> {
                         ErrorResponse errorResponse = errorMappingHelper.mapErrorObject(reqId, uri, response, e);
@@ -65,7 +67,7 @@ public class RestClient {
                     });
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, response -> {
-                    // logger.error("Server error received inside RestClient.postRestCall method");
+                    logger.error("Server error received inside RestClient.postRestCall method");
                     
                     return response.bodyToMono(Object.class).flatMap(e -> {
                         ErrorResponse errorResponse = errorMappingHelper.mapErrorObject(reqId, uri, response, e);
@@ -81,6 +83,5 @@ public class RestClient {
                     });
                 })
                 .toEntity(resType);
-                //.retryWhen(Retry.backoff(3, Duration.ofMillis(250)));
     }
 }

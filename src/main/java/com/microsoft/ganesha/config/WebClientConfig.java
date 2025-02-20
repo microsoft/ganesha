@@ -12,9 +12,8 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
-// import org.apache.logging.log4j.LogManager;
-// import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfig {
 
-//     private final Logger LOGGER = LogManager.getLogger(this.getClass());
+    private final Logger LOGGER = LogManager.getLogger(this.getClass());
 
     @Value("${webclient.connection.timeout}")
     private String webClientConnectionTimeOut;
@@ -119,8 +118,8 @@ public class WebClientConfig {
                             .addHandlerLast(new WriteTimeoutHandler(Integer.parseInt(webClientWriteTimeOut),
                                     TimeUnit.MILLISECONDS)));
         } catch (Exception ex) {
-        //     LOGGER.error("Error Occurred while creating HttpClient, Error Message :: {}"
-                //     + "Exception :: {}", ex.getMessage(), ex);
+            LOGGER.error("Error Occurred while creating HttpClient, Error Message :: {}"
+                    + "Exception :: {}", ex.getMessage(), ex);
 
             ErrorResponse errorResponse = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())
@@ -142,7 +141,7 @@ public class WebClientConfig {
     @Bean
     public WebClient createWebClient(HttpClient httpClient) {
         WebClient webClient = null;
-        // LOGGER.info("Initializing WebClient bean inside createWebClient.");
+        LOGGER.info("Initializing WebClient bean inside createWebClient.");
 
         try {
             ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
@@ -152,11 +151,11 @@ public class WebClientConfig {
                     .filter(webClientFilter.responseFilter())
                     .build();
 
-        //     LOGGER.info("Webclient initialized successfully.");
+            LOGGER.info("Webclient initialized successfully.");
 
         } catch (Exception ex) {
-        //     LOGGER.error("Error Occurred inside createWebClient(), Error Message :: {}, "
-        //             + "Exception :: {}", ex.getMessage(), ex);
+            LOGGER.error("Error Occurred inside createWebClient(), Error Message :: {}, "
+                    + "Exception :: {}", ex.getMessage(), ex);
 
             ErrorResponse errorResponse = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())

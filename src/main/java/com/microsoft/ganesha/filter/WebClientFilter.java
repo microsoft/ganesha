@@ -1,8 +1,8 @@
 package com.microsoft.ganesha.filter;
 
 import com.microsoft.ganesha.constant.APIConstants;
-// import org.apache.logging.log4j.LogManager;
-// import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class WebClientFilter {
 
-    // private static final Logger LOGGER = LogManager.getLogger(WebClientFilter.class);
+    private static final Logger LOGGER = LogManager.getLogger(WebClientFilter.class);
 
     /**
      * Filter to log incoming request
@@ -22,7 +22,7 @@ public class WebClientFilter {
      */
     public ExchangeFilterFunction requestFilter() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            // LOGGER.info("Inside requestFilter()");
+            LOGGER.info("Inside requestFilter()");
 
             ClientRequest.Builder requestBuilder = ClientRequest.from(clientRequest)
                     .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
@@ -37,8 +37,8 @@ public class WebClientFilter {
 
             // request.headers().forEach((key, value) -> LOGGER.info("Request Header Key :: {} , Value :: {}", key, value));
 
-            // LOGGER.info("Request URL :: {}", request.url());
-            // LOGGER.info("Request Method :: {}", request.method());
+            LOGGER.info("Request URL :: {}", request.url());
+            LOGGER.info("Request Method :: {}", request.method());
 
             return Mono.just(request);
         });
@@ -51,7 +51,7 @@ public class WebClientFilter {
      */
     public ExchangeFilterFunction responseFilter() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            // LOGGER.info("RESPONSE CODE:: {}", clientResponse.statusCode());
+            LOGGER.info("RESPONSE CODE:: {}", clientResponse.statusCode());
             return Mono.just(clientResponse);
         });
     }

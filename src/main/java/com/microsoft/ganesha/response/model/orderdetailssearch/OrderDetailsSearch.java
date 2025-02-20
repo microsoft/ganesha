@@ -30,8 +30,8 @@ public class OrderDetailsSearch implements Serializable {
     @JsonProperty(value = "orderType")
     private String orderType;
 
-    @JsonProperty(value = "orderSource")
-    private String orderSource;
+    // @JsonProperty(value = "orderSource")
+    // private String orderSource;
 
     @JsonProperty(value = "orderCreationDate")
     private String orderCreationDate;
@@ -45,8 +45,8 @@ public class OrderDetailsSearch implements Serializable {
     @JsonProperty(value = "estimatedAmount")
     private float estimatedAmount;
 
-    @JsonProperty(value = "orderStatus")
-    private OrderStatus orderStatus;
+    // @JsonProperty(value = "orderStatus")
+    // private OrderStatus orderStatus;
 
     @JsonProperty(value = "irisStatus")
     private IrisStatus irisStatus;
@@ -60,14 +60,14 @@ public class OrderDetailsSearch implements Serializable {
     @JsonProperty(value = "shipping")
     private Shipping shipping;
 
-    @JsonProperty(value = "paymentsBackup")
-    private List<Payments> paymentsBackup;
+    // @JsonProperty(value = "paymentsBackup")
+    // private List<Payments> paymentsBackup;
 
-    @JsonProperty(value = "payments")
-    private List<Payments> payments;
+    // @JsonProperty(value = "payments")
+    // private List<Payments> payments;
 
-    @JsonProperty(value = "easyPaymentDetails")
-    private List<EasyPaymentDetails> easyPaymentDetails;
+    // @JsonProperty(value = "easyPaymentDetails")
+    // private List<EasyPaymentDetails> easyPaymentDetails;
 
     @JsonProperty(value = "holds")
     private List<OrderLinesHolds> holds;

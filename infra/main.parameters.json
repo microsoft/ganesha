@@ -7,9 +7,6 @@
     },
     "location": {
       "value": "${AZURE_LOCATION}"
-    },
-    "mongodbPassword": {
-      "value": "${MONGODB_PASSWORD}"
     }
   }
 }

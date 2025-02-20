@@ -13,22 +13,22 @@ public class AppConfig {
     @Value("${AZURE_CLIENT_KEY}")
     private String azureClientKey;
 
-    @Value("${CLIENT_ENDPOINT}")
+    @Value("${UaisAzureOpenaiEndpoint}")
     private String clientEndpoint;
 
-    @Value("${MODEL_ID}")
+    @Value("${PERE_MODEL_ID}")
     private String modelId;
 
-    @Value("${AZURE_CLIENT_ID}")
+    @Value("${UaisAzureClientId}")
     private String azureClientId;
 
-    @Value("${AZURE_TENANT_ID}")
+    @Value("${UaisAzureTenantId}")
     private String azureTenantId;
 
-    @Value("${AZURE_CLIENT_SECRET}")
+    @Value("${UaisAzureAppRegistrationClientSecret}")
     private String azureClientSecret;
 
-    @Value("${AZURE_PROJECT_ID}")
+    @Value("${PERE_PROJECT_ID}")
     private String projectId;
 
     @Value("${HemiOrderDetailsEndpoint}")
@@ -36,24 +36,18 @@ public class AppConfig {
 
     @Value("${HemiPrescriptionSearchEndpoint}")
     private String hemiPrescriptionSearchEndpoint;
-    @Value("${AZURE_COSMOS_CONN_STR}")
-    private String azureCosmosConnString;
 
-    @Value("${AZURE_COSMOS_COLLECTION}")
-    private String azureCosmosCollection;
+    @Value("${PERE_MONGO_COLLECTION}")
+    private String pereMongoCollection;
 
-    @Value("${AZURE_COSMOS_DATABASE}")
-    private String azureCosmosDatabase;
+    @Value("${PERE_MONGO_DATABASE}")
+    private String pereMongoDatabase;
 
     @Value("${mongoServiceName}")
     private String mongoServiceName;
 
-
-    // @Value("${mongoServiceName:inMemory}")
-    // private String mongoServiceName;
-
-    // @Value("${AZURE_COSMOS_CONN_STR:mongodb+srv://u:p@somecluster.mongocluster.cosmos.azure.com}")
-    // private String azureCosmosConnString;
+    @Value("${PereMongoConnStr}")
+    private String pereMongoConnString;
 
     public String getAzureClientKey() {
         return azureClientKey;
@@ -101,16 +95,16 @@ public class AppConfig {
         return new HemiAccessTokenResponse();
     }
     
-    public String getAzureCosmosConnString() {
-        return azureCosmosConnString;
+    public String getPereMongoConnString() {
+        return pereMongoConnString;
     }
 
-    public String getAzureCosmosCollection() {
-        return azureCosmosCollection;
+    public String getPereMongoCollection() {
+        return pereMongoCollection;
     }
 
-    public String getAzureCosmosDatabase() {
-        return azureCosmosDatabase;
+    public String getPereMongoDatabase() {
+        return pereMongoDatabase;
     }
 
     public String getMongoServiceName() {

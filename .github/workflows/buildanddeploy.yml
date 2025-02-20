@@ -1,0 +1,22 @@
+name: Microservice CI-CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      APPENV:
+        description: "What environment is this deploy to?"
+        required: true
+        default: "test"
+      
+  pull_request:
+    types: [closed]
+    branches:
+     - 'main'
+
+jobs:
+  call-workflow-api-deployment:
+    uses: optum-rx-consumer-digital/advocate-central-devops-gitactions/.github/workflows/PERE-Deployment.yml@main
+    with:
+      AZURE_REPO: predictive-engagement-reason-engine
+      APPENV: ${{ github.event.inputs.APPENV || 'test' }}
+    secrets: inherit
