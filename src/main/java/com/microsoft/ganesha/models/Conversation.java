@@ -12,8 +12,6 @@ import org.bson.Document;
 public class Conversation {
     private UUID conversationId;
     private List<DisplayChatMessage> messages;
-    private String patientId;
-    private String correlationId;
 
     public Conversation() {
     }
@@ -29,8 +27,6 @@ public class Conversation {
     public Conversation(UUID conversationId, List<DisplayChatMessage> messages) {
         this.conversationId = conversationId;
         this.messages = messages;
-        this.patientId = patientId;
-        this.correlationId = correlationId;
     }
 
     public Conversation(UUID conversationId, ChatHistory chatHistory) {
@@ -99,13 +95,5 @@ public class Conversation {
             }
         }
         return chatHistory;
-    }
-
-    public String getPatientId() {
-        return patientId;
-    }
-
-    public String getCorrelationId() {
-        return correlationId;
     }
 }

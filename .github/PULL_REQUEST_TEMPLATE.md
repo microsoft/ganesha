@@ -4,8 +4,10 @@
 
 ## Does this introduce a breaking change?
 <!-- Mark one with an "x". -->
-- [ ] Yes
-- [ ] No
+```
+[ ] Yes
+[ ] No
+```
 
 ## Pull Request Type
 What kind of change does this Pull Request introduce?
