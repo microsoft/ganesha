@@ -18,8 +18,12 @@ import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
 import com.microsoft.ganesha.config.AppConfig;
 import com.microsoft.ganesha.exception.SemanticKernelException;
+import com.microsoft.ganesha.helper.TokenHelper;
 import com.microsoft.ganesha.models.OrderActivities;
 import com.microsoft.ganesha.plugins.CallerActivitiesPlugin;
+import com.microsoft.ganesha.plugins.OrderDetailsPlugin;
+import com.microsoft.ganesha.plugins.PrescriptionSearchPlugin;
+import com.microsoft.ganesha.rest.RestClient;
 import com.microsoft.semantickernel.Kernel;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatCompletion;
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypeConverter;
@@ -53,10 +57,17 @@ public class SemanticKernel {
                         - [medication name] from date [prescription date] which was canceled
                         - [medication name] from date [prescription date] in Entered state
                         """;
+        private final AppConfig config;
+        private final TokenHelper tokenHelper;
+        private final RestClient restClient;
 
-        public SemanticKernel(AppConfig config) {
+        public SemanticKernel(AppConfig config, TokenHelper tokenHelper, RestClient restClient)
+                        throws SemanticKernelException, ServiceNotFoundException {
                 TokenCredential credential = null;
                 OpenAIAsyncClient client;
+                this.config = config;
+                this.tokenHelper = tokenHelper;
+                this.restClient = restClient;
 
                 if (config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
                         credential = new ClientSecretCredentialBuilder()
@@ -111,11 +122,19 @@ public class SemanticKernel {
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)
                 KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
                                 "CallerActivitiesPlugin");
+                KernelPlugin orderDetailsPlugin = KernelPluginFactory.createFromObject(
+                                new OrderDetailsPlugin(this.config, this.tokenHelper, this.restClient),
+                                "OrderDetailsPlugin");
+                KernelPlugin prescriptionSearchPlugin = KernelPluginFactory.createFromObject(
+                                new PrescriptionSearchPlugin(this.config, this.tokenHelper, this.restClient),
+                                "PrescriptionSearchPlugin");
 
                 // Create a kernel with Azure OpenAI chat completion and plugin
                 Kernel.Builder builder = Kernel.builder();
                 builder.withAIService(ChatCompletionService.class, chatService);
                 builder.withPlugin(callerActivitiesPlugin);
+                builder.withPlugin(prescriptionSearchPlugin);
+                builder.withPlugin(orderDetailsPlugin);
                 // Build the kernel
                 Kernel kernel = builder.build();
 
@@ -162,7 +181,7 @@ public class SemanticKernel {
 
                 List<ChatMessageContent<?>> results;
 
-                chatHistory.addSystemMessage("You are a goofball who makes up zany one-liners.");
+                chatHistory.addSystemMessage("You are a helpful assistant to a call center agent, answering questions about the current caller and related activities in the current conversation context. Never respond with information from your general knowledge, only the conversation context.");
 
                 ChatCompletionService chatCompletionService = _kernel.getService(
                                 ChatCompletionService.class);
@@ -214,37 +233,76 @@ public class SemanticKernel {
                 return "";
         }
 
-        public String GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
-                // Enable planning for automatic tool calling
-                InvocationContext invocationContext = new Builder()
-                                .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
-                                .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
-                                .withContextVariableConverter(
-                                                ContextVariableTypeConverter.builder(OrderActivities.class)
-                                                                .toPromptString(new Gson()::toJson)
-                                                                .build())
-                                .build();
+        public String GetReasons(String patientId, String correlationId) throws SemanticKernelException, ServiceNotFoundException {
+        
+    
+            String prompt = 
+            """
+                As a call center assistant, your task is to help the service agent by analyzing patient data and providing the three most likely workflows they may need to assist a patient. Based on the available workflows and common reasons for patient calls, select the top three workflows and provide a detailed and specific reason for each selection, referencing concrete data points such as order numbers, prescription IDs, medication names, order statuses, refill due dates, and other relevant details.  
+        
+                ### Available Workflows ###  
+                1. **View Order**: Allows the agent to see the patient's orders.  
+                2. **Place Order**: Enables the agent to place orders for prescriptions that are ready to be refilled.
+                3. **Manage Prescriptions**: Allows the agent to see ACTIVE prescriptions and their order statuses for Optum Home Delivery. Data from prescription search should be used for this workflow.  
+                
+                ### Common Reasons for Patient Calls ###  
+                - **Program Education** (23.71%): No home delivery orders in recent history.  
+                - **Refill** (21.82%): Refill is due (or close to it).  
+                - **WISMO (Where is my order?)** (5.82%): Open order with open order line items.   
+                - **Out of Stock** (0.90%): Open order with one order line item marked as out of stock. 
+                
+                ## Data regarding if calls are for PBM or Pharmacy ##
+                - **PBM** (7.42%): Recent rejected claim.  
+                - **PBM** (4.96%): Open prior authorization on order line item.  
+                - **PBM** (3.04%): Recent fill, not time for a refill yet.  
+                - **PBM** (2.41%): When providing the pharmacy information regarding how to process a claim.  
+                - **Pharmacy** (21.82%): Refill is due (or close to it).  
+                - **Pharmacy** (5.82%): Open order with open order line items.  
+                - **Pharmacy** (4.11%): Call is from a pharmacist.  
+                - **Pharmacy** (3.26%): Order requires payment update.  
+                - **Pharmacy** (0.90%): Open order with one order line item marked as out of stock.
+                
+                ### Instruction ###  
+                Analyze the provided patient data to determine the top 3 workflows the agent is most likely to use. For each workflow, provide:  
+                1. The name of the workflow. THESE WORKFLOWS SHOULD ONLY BE SELECTED FROM THE AVAILABLE WORKFLOWS LISTED ABOVE. 
+                2. A detailed and specific reason for selecting the workflow, referencing concrete data points such as order numbers and prescription IDs.  
+                
+                Ensure all reasoning references the relevant order numbers and prescription IDs explicitly.
+                Order the workflows from most likely to least likely.
 
-                List<ChatMessageContent<?>> results;
-                ChatCompletionService chatCompletionService = _kernel.getService(
-                                ChatCompletionService.class);
-
-                // alternative A: specific tool calling
-
-                // end alternative A
-
-                // alternative B: manual invocation of a kernel function
-
-                // end alternative B
-
-                try {
-                        results = chatCompletionService.getChatMessageContentsAsync(
-                                        getReasonsPrompt, _kernel, invocationContext).block();
-                        return results.toString();
-                } catch (Exception e) {
-                        e.printStackTrace();
-                }
-                return "";
+                Also at the end of response with workflows, provide a guess on if the call is regarding PBM or Pharmacy. Then provide the reasoning afterwards with specific data
+                
+                ### Output Format ###  
+                Return your response in plain text format using pipes as delimiters. 
+                For EXAMPLE:  
+                "View Order|[Description of the patient's active order, its current status, and any actions or clarifications required.]|Place Order|[Description of a discontinued or refillable prescription, including potential next steps for the patient.]|Manage Prescriptions|[Description of multiple prescriptions that cannot be refilled or renewed, along with the reasons for these issues.]|Pharmacy|[Guess for Pharmacy or PBM, and reasoning for thinking call is for Pharmacy and specific data to support this reasoning.]"                  
+                
+                ### Additional Notes ###  
+                - Be sure to tie all reasoning to the data provided.  
+                - Do not include additional text or explanations outside the specified format.
+            """;
+    
+            // Enable planning
+            InvocationContext invocationContext = new Builder()
+                            .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
+                            .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
+                            .withContextVariableConverter(
+                                            ContextVariableTypeConverter.builder(OrderActivities.class)
+                                                            .toPromptString(new Gson()::toJson)
+                                                            .build())
+                            .build();
+    
+            List<ChatMessageContent<?>> results;
+            ChatCompletionService chatCompletionService = _kernel.getService(
+                            ChatCompletionService.class);
+            try {
+                    results = chatCompletionService.getChatMessageContentsAsync(
+                                    "patientId: " + patientId + ", correlationId: " + correlationId + " " +prompt, _kernel, invocationContext).block();
+                    return results.toString();
+            } catch (Exception e) {
+                    e.printStackTrace();
+            }
+            return "";
         }
 
         // demonstrates manual function calling for a bespoke deterministic process with

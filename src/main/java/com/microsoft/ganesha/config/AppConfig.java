@@ -1,8 +1,11 @@
 package com.microsoft.ganesha.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+
+import com.microsoft.ganesha.response.HemiAccessTokenResponse;
 
 @Configuration
 @Scope("singleton")
@@ -10,35 +13,41 @@ public class AppConfig {
     @Value("${AZURE_CLIENT_KEY}")
     private String azureClientKey;
 
-    @Value("${CLIENT_ENDPOINT}")
+    @Value("${UaisAzureOpenaiEndpoint}")
     private String clientEndpoint;
 
-    @Value("${MODEL_ID}")
+    @Value("${PERE_MODEL_ID}")
     private String modelId;
 
-    @Value("${AZURE_CLIENT_ID}")
+    @Value("${UaisAzureClientId}")
     private String azureClientId;
 
-    @Value("${AZURE_TENANT_ID}")
+    @Value("${UaisAzureTenantId}")
     private String azureTenantId;
 
-    @Value("${AZURE_CLIENT_SECRET}")
+    @Value("${UaisAzureAppRegistrationClientSecret}")
     private String azureClientSecret;
 
-    @Value("${AZURE_PROJECT_ID}")
+    @Value("${PERE_PROJECT_ID}")
     private String projectId;
 
-    @Value("${AZURE_COSMOS_CONN_STR}")
-    private String azureCosmosConnString;
+    @Value("${HemiOrderDetailsEndpoint}")
+    private String hemiOrderDetailsEndpoint;
 
-    @Value("${AZURE_COSMOS_COLLECTION}")
-    private String azureCosmosCollection;
+    @Value("${HemiPrescriptionSearchEndpoint}")
+    private String hemiPrescriptionSearchEndpoint;
 
-    @Value("${AZURE_COSMOS_DATABASE}")
-    private String azureCosmosDatabase;
+    @Value("${PERE_MONGO_COLLECTION}")
+    private String pereMongoCollection;
+
+    @Value("${PERE_MONGO_DATABASE}")
+    private String pereMongoDatabase;
 
     @Value("${mongoServiceName}")
     private String mongoServiceName;
+
+    @Value("${PereMongoConnStr}")
+    private String pereMongoConnString;
 
     public String getAzureClientKey() {
         return azureClientKey;
@@ -67,17 +76,35 @@ public class AppConfig {
     public String getProjectId() {
         return projectId;
     }
+
+    public String getHemiOrderDetailsEndpoint() {
+        return hemiOrderDetailsEndpoint;
+    }
+
+    public String getHemiPrescriptionSearchEndpoint() {
+        return hemiPrescriptionSearchEndpoint;
+    }
+
+    /**
+     * HemiAccessTokenResponse Bean
+     *
+     * @return HemiAccessTokenResponse
+     */
+    @Bean
+    public HemiAccessTokenResponse hemiAccessTokenResponse() {
+        return new HemiAccessTokenResponse();
+    }
     
-    public String getAzureCosmosConnString() {
-        return azureCosmosConnString;
+    public String getPereMongoConnString() {
+        return pereMongoConnString;
     }
 
-    public String getAzureCosmosCollection() {
-        return azureCosmosCollection;
+    public String getPereMongoCollection() {
+        return pereMongoCollection;
     }
 
-    public String getAzureCosmosDatabase() {
-        return azureCosmosDatabase;
+    public String getPereMongoDatabase() {
+        return pereMongoDatabase;
     }
 
     public String getMongoServiceName() {

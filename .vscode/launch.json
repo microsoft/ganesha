@@ -8,14 +8,7 @@
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "mainClass": "com.microsoft.ganesha.GaneshaApplication",
-            "args": [
-                "spring-boot:run"
-            ],
-            "serverReadyAction": {
-                "pattern": "Tomcat initialized with port ([0-9]+)",
-                "uriFormat": "http://localhost:%s/index.html",
-                "action": "openExternally"
-            }
+            "args": ["spring-boot:run"]
         }
     ]
 }

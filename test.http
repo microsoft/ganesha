@@ -1,8 +1,8 @@
 
-GET http://localhost:8080/lightstatus
+GET http://localhost:8951/lightstatus
 
 ###
-POST  http://localhost:8080/prompt 
+POST  http://localhost:8951/prompt 
 Content-Type: application/json
 
 {
@@ -10,43 +10,38 @@ Content-Type: application/json
 }
 
 ###
-POST  http://localhost:8080/predictReason 
+POST  http://localhost:8951/predictReason 
 Content-Type: application/json
 
 {
-    "memberid": "12345"
-}
-###
-
-POST http://localhost:8080/conversation
-Content-Type: application/json
-
-{
-  "id": "cec7d4eb-76c2-4b15-ab86-67367ded907d",
-  "messages": [
-    {
-      "message": "Hello, I need help with my prescription.",
-      "role": "USER",
-      "time": "2023-10-01T10:00:00Z"
-    },
-    {
-      "message": "Sure, I can help you with that. Can you provide me with your member ID?",
-      "role": "ASSISTANT",
-      "time": "2023-10-01T10:01:00Z"
-    },
-    {
-      "message": "My member ID is 12345.",
-      "role": "USER",
-      "time": "2023-10-01T10:02:00Z"
+    "patientId": "124027968",
+    "searchInputMetaData" : {
+        "correlationId": "test1234"
     }
-  ]
+}
+###
+
+POST http://localhost:8951/conversation
+Content-Type: application/json
+
+{
+    "id": "924f1ed0-daf0-453f-bc89f5237f3fefe6e",
+    "patientId": "130697362",
+    "correlationId": "skim62_test",
+    "messages": [
+        {
+            "message": "Why?",
+            "role": "USER",
+            "time": "2023-10-01T12:00:00Z"
+        }
+    ]
 }
 
 ###
-GET http://localhost:8080/conversation
+GET http://localhost:8951/conversation
 
 ###
-GET http://localhost:8080/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d
+GET http://localhost:8951/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d
 
 ###
-DELETE http://localhost:8080/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d
+DELETE http://localhost:8951/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d

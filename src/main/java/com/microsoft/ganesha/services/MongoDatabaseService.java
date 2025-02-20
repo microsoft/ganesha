@@ -32,8 +32,8 @@ public class MongoDatabaseService implements MongoService {
 
     @Override
     public Conversation GetConversation(UUID conversationId) throws Exception {
-        MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
+        MongoDatabase database = mongoClient.getDatabase(config.getPereMongoDatabase());
+        MongoCollection<Document> collection = database.getCollection(config.getPereMongoCollection());
         Document document = collection.find(Filters.eq("conversationId", conversationId.toString())).first();
 
         if (document != null) {
@@ -46,8 +46,8 @@ public class MongoDatabaseService implements MongoService {
 
     @Override
     public void UpsertConversation(Conversation conversation) throws Exception {
-        MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
+        MongoDatabase database = mongoClient.getDatabase(config.getPereMongoDatabase());
+        MongoCollection<Document> collection = database.getCollection(config.getPereMongoCollection());
 
         Document document = new Document("conversationId", conversation.getConversationId().toString())
                 .append("messages",
@@ -61,15 +61,15 @@ public class MongoDatabaseService implements MongoService {
 
     @Override
     public void DeleteConversation(UUID conversationId) throws Exception {
-        MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
+        MongoDatabase database = mongoClient.getDatabase(config.getPereMongoDatabase());
+        MongoCollection<Document> collection = database.getCollection(config.getPereMongoCollection());
         collection.deleteOne(Filters.eq("conversationId", conversationId.toString()));
     }
 
     @Override
     public List<Conversation> GetConversations() throws Exception {
-        MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
+        MongoDatabase database = mongoClient.getDatabase(config.getPereMongoDatabase());
+        MongoCollection<Document> collection = database.getCollection(config.getPereMongoCollection());
 
         List<Conversation> conversations = collection.find().map(document -> new Conversation(document)).into(new ArrayList<>());
         return conversations;
