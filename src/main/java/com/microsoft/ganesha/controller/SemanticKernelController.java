@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,16 +13,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import com.microsoft.ganesha.config.AppConfig;
+import com.azure.core.annotation.Delete;
+import com.azure.core.annotation.Get;
+import com.azure.core.annotation.PathParam;
 import com.microsoft.ganesha.exception.SemanticKernelException;
-import com.microsoft.ganesha.helper.TokenHelper;
-import com.microsoft.ganesha.request.PredictReasonRequest;
-import com.microsoft.ganesha.rest.RestClient;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
 import com.microsoft.ganesha.models.DisplayChatMessage;
+import com.microsoft.ganesha.models.MemberIdRequest;
 import com.microsoft.ganesha.models.MulitEntityRequest;
 import com.microsoft.ganesha.models.SimplePromptRequest;
 import com.microsoft.ganesha.semantickernel.SemanticKernel;
@@ -31,36 +28,26 @@ import com.microsoft.ganesha.services.MongoServiceFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 
-
-
 @RestController
-@CrossOrigin(origins = "*")
 public class SemanticKernelController {
-    
-    private final AppConfig config;
-    private final TokenHelper tokenHelper;
-    private final RestClient restClient;
-    private final MongoService mongoService;
-    private final SemanticKernel kernel;
-
-    private final Logger LOGGER = LogManager.getLogger(this.getClass());
-
-    public SemanticKernelController(AppConfig config, TokenHelper tokenHelper, RestClient restClient, SemanticKernel kernel, MongoServiceFactory mongoService) {
-        this.config = config;
-        this.tokenHelper = tokenHelper;
-        this.restClient = restClient;
-        this.mongoService = mongoService.create();
-        this.kernel = kernel;
+    public SemanticKernelController(SemanticKernel kernel, MongoServiceFactory mongoService) {
+        _kernel = kernel;
+        _mongoService = mongoService.create();
     }
 
+    private SemanticKernel _kernel;
+    private MongoService _mongoService;
+
     @PostMapping("/prompt")
-    String replaceEmployee(@RequestBody SimplePromptRequest prompt) throws SemanticKernelException, ServiceNotFoundException {
-        return kernel.GetSKResult(prompt.getPrompt());
+    String replaceEmployee(@RequestBody SimplePromptRequest prompt)
+            throws SemanticKernelException, ServiceNotFoundException {
+        return _kernel.GetSKResult(prompt.getPrompt());
     }
 
     @PostMapping("/predictReason")
-    String predictReason(@RequestBody PredictReasonRequest request) throws SemanticKernelException, ServiceNotFoundException {
-        return kernel.GetReasons(request.getPatientId(), request.getSearchInputMetaData().getCorrelationId());
+    String predictReason(@RequestBody MemberIdRequest memberid)
+            throws SemanticKernelException, ServiceNotFoundException {
+        return _kernel.GetReasons(memberid.GetMemberId());
     }
 
     @GetMapping("/conversation")
@@ -68,7 +55,7 @@ public class SemanticKernelController {
             @RequestParam(value = "expanded", required = false, defaultValue = "false") boolean expanded)
             throws ServiceNotFoundException {
         try {
-            var conversations = mongoService.GetConversations();
+            var conversations = _mongoService.GetConversations();
 
             if (!expanded) {
                 for (var conversation : conversations) {
@@ -85,7 +72,7 @@ public class SemanticKernelController {
     @GetMapping("/conversation/{conversationId}")
     Conversation getConversation(@PathVariable("conversationId") UUID conversationId) throws ServiceNotFoundException {
         try {
-            return mongoService.GetConversation(conversationId);
+            return _mongoService.GetConversation(conversationId);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -94,7 +81,7 @@ public class SemanticKernelController {
     @DeleteMapping("/conversation/{conversationId}")
     void deleteConversation(@PathVariable("conversationId") UUID conversationId) throws ServiceNotFoundException {
         try {
-            mongoService.DeleteConversation(conversationId);
+            _mongoService.DeleteConversation(conversationId);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -103,7 +90,6 @@ public class SemanticKernelController {
     @PostMapping("/conversation")
     Conversation conversation(@RequestBody Conversation conversation)
             throws SemanticKernelException, ServiceNotFoundException {
-        LOGGER.info("Processing conversation in controller with correlation Id {}", conversation.getCorrelationId());
         try {
 
             if (conversation.getMessages() == null || conversation.getMessages().isEmpty()) {
@@ -117,9 +103,7 @@ public class SemanticKernelController {
                 conversation.setConversationId(java.util.UUID.randomUUID());
             } else {
                 try {
-                    LOGGER.info("Entering getConversation in conversation controller with correlation Id {}", conversation.getCorrelationId());
-
-                    var dbConversation = mongoService.GetConversation(conversation.getConversationId());
+                    var dbConversation = _mongoService.GetConversation(conversation.getConversationId());
 
                     conversationDoesNotExist = dbConversation == null;
                 } catch (Exception e) {
@@ -129,12 +113,10 @@ public class SemanticKernelController {
 
             // add latest message in conversation to db or if convo doesn't exist, make it
             // so
-            LOGGER.info("Upserting conversation with ID {}", conversation.getConversationId());  
-            mongoService.UpsertConversation(conversation);
+            _mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                LOGGER.info("Entering getReasons in conversation controller with correlation Id {}", conversation.getCorrelationId());
-                String reason = kernel.GetReasons(conversation.getPatientId(), conversation.getCorrelationId());
+                String reason = _kernel.GetReasons(conversation.getMessages().get(0).getMessage());
 
                 if (reason != null) {
                     var reasonMessage = new DisplayChatMessage(reason, AuthorRole.ASSISTANT.toString(),
@@ -143,8 +125,7 @@ public class SemanticKernelController {
                     conversation.getMessages().add(reasonMessage);
                 }
             } else {
-                LOGGER.info("Entering converse in conversation controller with correlation Id {}", conversation.getCorrelationId());
-                var chatHistory = kernel.Converse(conversation.toChatHistory());
+                var chatHistory = _kernel.Converse(conversation.toChatHistory());
 
                 // right now this constructor filters out tool and system messages
                 // we may want to consider if we want to persist them for transparency?
@@ -152,13 +133,12 @@ public class SemanticKernelController {
             }
 
             // now make sure that completion is persisted
-            mongoService.UpsertConversation(conversation);
+            _mongoService.UpsertConversation(conversation);
 
             return conversation;
         } catch (Exception e) {
             // todo: refine exceptions and handling throughout stack...
             // probably mongo service interface needs closer look
-            LOGGER.info("Exception raised {} in conversation controller with correlation Id {}", e.getMessage(), conversation.getCorrelationId());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
@@ -167,13 +147,13 @@ public class SemanticKernelController {
     String getClaims(@RequestBody SimplePromptRequest promptRequest)
             throws SemanticKernelException, ServiceNotFoundException {
 
-        return kernel.getClaims(promptRequest.getPrompt());
+        return _kernel.getClaims(promptRequest.getPrompt());
     }
 
     // exceedingly open to a more thought through use case and naming for this
     @PostMapping("/processMultipleEntities")
     String processMultipleEntities(@RequestBody MulitEntityRequest request)
             throws SemanticKernelException, ServiceNotFoundException {
-        return kernel.processMultipleEntities(request.GetMemberId(), request.getClaimId());
+        return _kernel.processMultipleEntities(request.GetMemberId(), request.getClaimId());
     }
 }

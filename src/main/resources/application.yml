@@ -1,73 +1,18 @@
 AZURE_CLIENT_KEY: 
-PERE_MODEL_ID:
-UaisAzureAppRegistrationClientSecret:
-UaisAzureClientId :
-UaisAzureOpenaiEndpoint :
-UaisAzureTenantId :
-PERE_PROJECT_ID:
-
-HemiAccessTokenEndpoint: 
-HemiPrescriptionSearchEndpoint:
-HemiOrderDetailsEndpoint: 
-HemiAccessTokenRequest:
-HemiAccessACQTokenRequest:
-
+CLIENT_ENDPOINT: 
+MODEL_ID:
+AZURE_CLIENT_ID:
+AZURE_TENANT_ID:
+AZURE_CLIENT_SECRET:
+AZURE_PROJECT_ID:
+AZURE_COSMOS_CONN_STR: 
+AZURE_COSMOS_COLLECTION:
+AZURE_COSMOS_DATABASE:
 #Leave blank for in memory 
-mongoServiceName: mongoDatabaseService
-
-PERE_MONGO_COLLECTION: 
-PERE_MONGO_DATABASE: 
-PERE_MONGO_CONN_STR: 
-
-webclient:
-  connection:
-    timeout: 60000
-  read:
-    timeout: 60000
-  write:
-    timeout: 60000
-
-httpclient:
-    max-connections: 1000
-    max-idle-time: 360000
-    max-life-time: 360000
-    pending-acq-timeout: 60000
-    evict-in-background: 120000
-
-SetLocalEnvFlag: true
-
-
----
+mongoServiceName: 
+#Uncomment below to use MongoDB
+#mongoServiceName: mongoDatabaseService
 
 spring:
   config:
-    activate:
-      on-profile:
-        - test
-  sleuth:
-    enabled: true
-  application:
-    name:
-  cloud:
-    azure:
-      keyvault:
-        secret:
-          property-sources[0]:
-            credential:
-              client-id: CLIENTID
-              client-secret: CLIENTSECRET
-            endpoint: https://acq-test-us-c-keyvault.vault.azure.net/
-            profile:
-              tenant-id: TENANTID
-    config:
-      profile: test
-    kubernetes:
-      discovery:
-        enabled: true
-
-name: test
-environment: test
-
-azure:
-  application-insights:
-    instrumentation-key: 95eb27e2-e7ea-40cd-be24-18879b9d71df
+    import: application-local.yml

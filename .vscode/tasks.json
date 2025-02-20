@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "package (functions)",
+			"label": "maven clean package",
 			"command": "mvn clean package",
 			"type": "shell",
 			"group": {

@@ -1,9 +1,0 @@
-apiVersion: v1
-metadata:
-  askId: AIDE_0089327
-  caAgileId: poc
-  projectKey: com.optum.advocatecentral:predictive-engagement-reason-engine
-  projectFriendlyName: predictive-engagement-reason-engine
-  projectName: predictive-engagement-reason-engine
-  componentType: code
-  targetQG: GATE_00

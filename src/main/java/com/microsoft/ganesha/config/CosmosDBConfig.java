@@ -17,7 +17,7 @@ public class CosmosDBConfig {
     
     @Bean
     public MongoClient mongoClient() {
-        ConnectionString connectionString = new ConnectionString(config.getPereMongoConnString());
+        ConnectionString connectionString = new ConnectionString(config.getAzureCosmosConnString());
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
             .applyConnectionString(connectionString)
             .build();

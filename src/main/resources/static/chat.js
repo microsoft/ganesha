@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const chatMessages = document.getElementById('messages');
         chatMessages.innerHTML = '';
-        displayMessage('assistant', 'Hello! I am PERE Chatbot, here to assist you with questions related to patient orders or prescriptions. Please note that I am an AI tool powered by a language model, and while I strive to provide accurate information, my responses may not always be fully factual or up-to-date. It is important to verify any information I provide.', new Date());
+        displayMessage('assistant', 'Please be advised, I am an assistant with access to this chat context. Though I am a robot and not a person, your words are still real. Please use civility in our discourse.', new Date());
 
         if (!conversation.messages || conversation.messages.length === 0)
             return;
