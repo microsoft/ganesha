@@ -17,11 +17,15 @@ public class CosmosDBConfig {
     
     @Bean
     public MongoClient mongoClient() {
-        ConnectionString connectionString = new ConnectionString(config.getAzureCosmosConnString());
-        MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
-            .applyConnectionString(connectionString)
-            .build();
+        if(config.getAzureCosmosConnString() != null && config.getAzureCosmosConnString() != ""){
+            ConnectionString connectionString = new ConnectionString(config.getAzureCosmosConnString());
+            MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
+                .applyConnectionString(connectionString)
+                .build();
 
-        return MongoClients.create(mongoClientSettings);
+            return MongoClients.create(mongoClientSettings);
+        }
+        else
+            return MongoClients.create();
     }
 }

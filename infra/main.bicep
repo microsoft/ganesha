@@ -19,7 +19,7 @@ param mongodbUsername string = 'Admin001'
 
 @description('The MongoDB password to use for the cluster')
 @secure()
-param mongodbPassword string = ''
+param mongodbPassword string
 
 @description('The name of the MongoDB database')
 param mongodbDatabaseName string = 'ganeshadb'

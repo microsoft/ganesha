@@ -25,6 +25,7 @@ import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatC
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypeConverter;
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypes;
 import com.microsoft.semantickernel.hooks.KernelHooks;
+import com.microsoft.semantickernel.implementation.EmbeddedResourceLoader;
 import com.microsoft.semantickernel.orchestration.InvocationContext;
 import com.microsoft.semantickernel.orchestration.InvocationContext.Builder;
 import com.microsoft.semantickernel.orchestration.InvocationReturnMode;
@@ -32,6 +33,7 @@ import com.microsoft.semantickernel.orchestration.ToolCallBehavior;
 import com.microsoft.semantickernel.plugin.KernelPlugin;
 import com.microsoft.semantickernel.plugin.KernelPluginFactory;
 import com.microsoft.semantickernel.semanticfunctions.KernelFunction;
+import com.microsoft.semantickernel.semanticfunctions.SemanticKernelOpenAPIImporter;
 import com.microsoft.semantickernel.semanticfunctions.KernelFunctionArguments;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
@@ -111,6 +113,16 @@ public class SemanticKernel {
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)
                 KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
                                 "CallerActivitiesPlugin");
+
+
+                String yaml = EmbeddedResourceLoader.readFile("rxclaim.yaml", RXClaimImporter.class);
+
+                KernelPlugin plugin = SemanticKernelOpenAPIImporter
+                .builder()
+                .withPluginName("rxclaim")
+                .withSchema(yaml)
+                .withServer("http://localhost:8090/api/v3")
+                .build();
 
                 // Create a kernel with Azure OpenAI chat completion and plugin
                 Kernel.Builder builder = Kernel.builder();
