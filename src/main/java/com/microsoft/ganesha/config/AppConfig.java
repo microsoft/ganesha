@@ -16,6 +16,9 @@ public class AppConfig {
     @Value("${MODEL_ID}")
     private String modelId;
 
+    @Value("${DEPLOYMENT_NAME}")
+    private String deploymentName;
+
     @Value("${AZURE_CLIENT_ID}")
     private String azureClientId;
 
@@ -50,6 +53,10 @@ public class AppConfig {
 
     public String getModelId() {
         return modelId;
+    }
+
+    public String getDeploymentName() {
+        return deploymentName;
     }
 
     public String getAzureClientId() {

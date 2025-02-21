@@ -31,3 +31,4 @@ resource embedding 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01'
 
 output endpoint string = account.properties.endpoint
 output key string = account.listKeys().key1
+output resourceId string = account.id
