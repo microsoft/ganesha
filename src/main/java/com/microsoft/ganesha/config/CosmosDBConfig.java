@@ -17,6 +17,9 @@ public class CosmosDBConfig {
     
     @Bean
     public MongoClient mongoClient() {
+        if (config.getAzureCosmosConnString() == null || config.getAzureCosmosConnString().isEmpty()) {
+            return MongoClients.create();
+        }
         ConnectionString connectionString = new ConnectionString(config.getAzureCosmosConnString());
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
             .applyConnectionString(connectionString)

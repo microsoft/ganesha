@@ -13,7 +13,7 @@
             ],
             "serverReadyAction": {
                 "pattern": "Tomcat initialized with port ([0-9]+)",
-                "uriFormat": "http://localhost:%s/index.html",
+                "uriFormat": "http://localhost:%s/",
                 "action": "openExternally"
             }
         }

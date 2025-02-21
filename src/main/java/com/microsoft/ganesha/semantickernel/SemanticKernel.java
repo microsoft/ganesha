@@ -13,6 +13,7 @@ import com.azure.core.credential.TokenRequestContext;
 import com.azure.core.http.HttpPipeline;
 import com.azure.core.http.HttpPipelineBuilder;
 import com.azure.core.http.policy.HttpPipelinePolicy;
+import com.azure.core.util.ClientOptions;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
@@ -58,7 +59,7 @@ public class SemanticKernel {
                 TokenCredential credential = null;
                 OpenAIAsyncClient client;
 
-                if (config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
+                if (config.getAzureClientSecret() != null && !config.getAzureClientSecret().isEmpty()) {
                         credential = new ClientSecretCredentialBuilder()
                                         .clientId(config.getAzureClientId())
                                         .tenantId(config.getAzureTenantId())
@@ -94,6 +95,10 @@ public class SemanticKernel {
                         if (config.getAzureTenantId() != null && !config.getAzureTenantId().isEmpty()) {
                                 builder.tenantId(config.getAzureTenantId());
                         }
+                        
+                        if (config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
+                                builder.managedIdentityClientId(config.getAzureClientId());
+                        }
 
                         credential = builder.build();
 
@@ -106,6 +111,7 @@ public class SemanticKernel {
                 // Create your AI service client
                 ChatCompletionService chatService = OpenAIChatCompletion.builder()
                                 .withModelId(config.getModelId())
+                                .withDeploymentName(config.getDeploymentName())
                                 .withOpenAIAsyncClient(client)
                                 .build();
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)
