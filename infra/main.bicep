@@ -14,24 +14,28 @@ param principalId string = ''
 
 param serviceName string = 'api'
 
-@description('The MongoDB username to use for the cluster')
-param mongodbUsername string = 'Admin001'
+// @description('The MongoDB username to use for the cluster')
+// param mongodbUsername string = 'Admin001'
 
-@description('The MongoDB password to use for the cluster')
-@secure()
-param mongodbPassword string
+// @description('The MongoDB password to use for the cluster')
+// @secure()
+// param mongodbPassword string = ''
 
-@description('The name of the MongoDB database')
-param mongodbDatabaseName string = 'ganeshadb'
+// @description('The name of the MongoDB database')
+// param mongodbDatabaseName string = 'ganeshadb'
 
-@description('The name of the MongoDB collection')
-param mongodbCollectionName string = 'chathistory'
+// @description('The name of the MongoDB collection')
+// param mongodbCollectionName string = 'chathistory'
+
+param modelId string = 'gpt-4o'
+param modelVersion string = '2024-08-06'
+param deploymentName string = 'gpt-4o'
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var storageAccountName = '${abbrs.storageStorageAccounts}${resourceToken}'
 var cognitiveAccountName = '${abbrs.cognitiveServicesAccounts}${resourceToken}'
-var mongoClusterName = '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+//var mongoClusterName = '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
 var containerRegistryName = '${abbrs.containerRegistryRegistries}${resourceToken}'
 
 var tags = {
@@ -73,11 +77,11 @@ module cognitive 'modules/cognitive/cognitive.bicep' = {
     accountName: cognitiveAccountName
     deployments: [
       {
-        name: 'chat'
+        name: deploymentName
         model: {
           format: 'OpenAI'
-          name: 'gpt-4o'
-          version: '2024-08-06'
+          name: modelId
+          version: modelVersion
         }
         capacity: 30
       }
@@ -94,21 +98,47 @@ module cognitive 'modules/cognitive/cognitive.bicep' = {
   }
 }
 
-module mongoCluster 'br/public:avm/res/document-db/mongo-cluster:0.1.1' = {
-  name: 'mongoClusterDeployment'
+var cognitiveAIUserRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+) // Cognitive Services OpenAI User
+
+module cognitiveAIIdentityAssignment 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
+  name: 'cognitive-role-assignment-identity'
   scope: resourceGroup(rg.name)
   params: {
-    // Required parameters
-    administratorLogin: mongodbUsername
-    administratorLoginPassword: mongodbPassword
-    name: mongoClusterName
-    nodeCount: 1
-    sku: 'M25'
-    storage: 32
-    // Non-required parameters
-    location: location
+    principalId: managedIdentity.outputs.principalId
+    resourceId: cognitive.outputs.resourceId
+    roleDefinitionId: cognitiveAIUserRole
   }
 }
+
+module cognitiveAIUserAssignment 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = if (!empty(principalId)) {
+  name: 'cognitive-role-assignment-user'
+  scope: resourceGroup(rg.name)
+  params: {
+    principalId: principalId
+    resourceId: cognitive.outputs.resourceId
+    roleDefinitionId: cognitiveAIUserRole
+  }
+}
+
+// ** Using in-memory storage. Uncomment to enable mongoDB service.
+// module mongoCluster 'br/public:avm/res/document-db/mongo-cluster:0.1.1' = {
+//   name: 'mongoClusterDeployment'
+//   scope: resourceGroup(rg.name)
+//   params: {
+//     // Required parameters
+//     administratorLogin: mongodbUsername
+//     administratorLoginPassword: mongodbPassword
+//     name: mongoClusterName
+//     nodeCount: 1
+//     sku: 'M25'
+//     storage: 32
+//     // Non-required parameters
+//     location: location
+//   }
+// }
 
 module containerRegistry 'br/public:avm/res/container-registry/registry:0.5.1' = {
   name: 'container-registry'
@@ -194,9 +224,14 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           value: managedIdentity.outputs.clientId
         }
         {
-          name: 'azure-cosmos-connection-string'
-          value: mongoCluster.outputs.connectionStringKey
+          name: 'azure-client-key'
+          value: cognitive.outputs.key
         }
+        // ** Using in-memory storage. Uncomment to enable mongoDB service.
+        // {
+        //   name: 'azure-cosmos-connection-string'
+        //   value: mongoCluster.outputs.connectionStringKey
+        // }
       ]
     }
     containers: [
@@ -213,9 +248,30 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
             secretRef: 'user-assigned-managed-identity-client-id'
           }
           {
-            name: 'AAZURE_COSMOS_CONN_STR'
-            secretRef: 'azure-cosmos-connection-string'
+            name: 'AZURE_COSMOS_CONN_STR'
+            value: ''
           }
+          {
+            name: 'AZURE_CLIENT_KEY'
+            secretRef: 'azure-client-key'
+          }
+          {
+            name: 'CLIENT_ENDPOINT'
+            value: cognitive.outputs.endpoint
+          }          
+          {
+            name: 'MODEL_ID'
+            value: modelId
+          }
+          {
+            name: 'DEPLOYMENT_NAME'
+            value: deploymentName
+          }
+          // ** Using in-memory storage. Uncomment to enable mongoDB service.
+          // {
+          //   name: 'AZURE_COSMOS_CONN_STR'
+          //   secretRef: 'azure-cosmos-connection-string'
+          // }
         ]
       }
     ]
