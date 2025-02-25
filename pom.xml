@@ -31,6 +31,15 @@
 	</properties>
 	<dependencyManagement>
         <dependencies>
+            <!--OpenTelemetry-->
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom</artifactId>
+                <version>2.13.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--OpenTelemetry-->
             <dependency>
                 <groupId>com.microsoft.semantic-kernel</groupId>
                 <artifactId>semantickernel-bom</artifactId>
@@ -45,7 +54,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
+        <!--OpenTelemetry-->
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+        </dependency>
+        <!--OpenTelemetry-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
