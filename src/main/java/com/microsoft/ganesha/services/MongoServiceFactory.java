@@ -19,11 +19,6 @@ public class MongoServiceFactory {
 
     
     public MongoService create() {
-        String serviceType = config.getMongoServiceName();
-        if ("mongoDatabaseService".equalsIgnoreCase(serviceType)) {
-            return new MongoDatabaseService(mongoClient, config);
-        }else {
-            return new InMemoryMongoService();
-        } 
+        return new MongoDatabaseService(mongoClient, config);
     }
 }

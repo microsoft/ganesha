@@ -9,7 +9,7 @@ import com.microsoft.applicationinsights.attach.ApplicationInsights;
 public class GaneshaApplication {
 
 	public static void main(String[] args) {
-		//ApplicationInsights.attach();
+		ApplicationInsights.attach();
 		SpringApplication.run(GaneshaApplication.class, args);
 	}
 
