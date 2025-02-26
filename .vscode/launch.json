@@ -11,6 +11,7 @@
             "args": [
                 "spring-boot:run"
             ],
+            "vmArgs": "-Dotel.java.global-autoconfigure.enabled=true",
             "serverReadyAction": {
                 "pattern": "Tomcat initialized with port ([0-9]+)",
                 "uriFormat": "http://localhost:%s/",

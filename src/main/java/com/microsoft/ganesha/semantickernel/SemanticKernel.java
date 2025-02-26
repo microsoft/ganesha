@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
+import com.azure.ai.openai.OpenAIServiceVersion;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
 import com.azure.core.http.HttpPipeline;
@@ -105,13 +106,14 @@ public class SemanticKernel {
                         client = new OpenAIClientBuilder()
                                         .credential(credential)
                                         .endpoint(config.getClientEndpoint())
+                                        .serviceVersion(OpenAIServiceVersion.V2025_01_01_PREVIEW)
                                         .buildAsyncClient();
                 }
 
                 // Create your AI service client
                 ChatCompletionService chatService = OpenAIChatCompletion.builder()
                                 .withModelId(config.getModelId())
-                                .withDeploymentName(config.getDeploymentName())
+                                .withDeploymentName(config.getDeploymentName())                                
                                 .withOpenAIAsyncClient(client)
                                 .build();
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)

@@ -1,62 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.2</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.microsoft</groupId>
-	<artifactId>ganesha</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>ganesha</name>
-	<description>Demo project for Spring Boot</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-	<properties>
-		<java.version>17</java.version>
-	</properties>
-	<dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.microsoft.semantic-kernel</groupId>
-                <artifactId>semantickernel-bom</artifactId>
-                <version>1.4.2</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.2</version>
+        <relativePath /> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.microsoft</groupId>
+    <artifactId>ganesha</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>ganesha</name>
+    <description>Demo project for Spring Boot</description>
+    <url />
+    <licenses>
+        <license />
+    </licenses>
+    <developers>
+        <developer />
+    </developers>
+    <scm>
+        <connection />
+        <developerConnection />
+        <tag />
+        <url />
+    </scm>
+    <properties>
+        <java.version>17</java.version>
+        <applicationinsights.agent.version>3.7.0</applicationinsights.agent.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!--OpenTelemetry-->
+        <!--OpenTelemetry-->
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-ai-openai</artifactId>
+            <version>1.0.0-beta.14</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-core</artifactId>
+            <version>${applicationinsights.agent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-runtime-attach</artifactId>
+            <version>3.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
-        
-		 <dependency>
+
+        <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-reactor-3.1</artifactId>
             <version>2.9.0-alpha</version>
@@ -64,46 +71,37 @@
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-api</artifactId>
+            <version>1.4.2</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-data-azureaisearch</artifactId>
+            <version>1.4.2</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-data-jdbc</artifactId>
+            <version>1.4.2</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-data-redis</artifactId>
+            <version>1.4.2</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-experimental</artifactId>
+            <version>1.4.2</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-aiservices-huggingface</artifactId>
+            <version>1.4.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <!-- <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j2-impl</artifactId>
-            <scope>runtime</scope>
-        </dependency> -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -117,6 +115,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-identity</artifactId>
+            <version>1.11.0</version>
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
@@ -145,6 +144,7 @@
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-aiservices-openai</artifactId>
+            <version>1.4.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
@@ -167,30 +167,56 @@
         <dependency>
             <groupId>com.github.victools</groupId>
             <artifactId>jsonschema-generator</artifactId>
+            <version>4.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.victools</groupId>
             <artifactId>jsonschema-module-jackson</artifactId>
+            <version>4.37.0</version>
         </dependency>
         <dependency>
             <groupId>com.lihaoyi</groupId>
             <artifactId>mill-main-api_2.12</artifactId>
             <version>0.5.1-21-9354e9</version>
-        </dependency>     
- 
+        </dependency>
+
         <dependency>
             <groupId>com.amido.stacks.modules</groupId>
             <artifactId>stacks-azure-cosmos</artifactId>
             <version>3.0.2</version>
         </dependency>
     </dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-agent</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>com.microsoft.azure</groupId>
+                            <artifactId>applicationinsights-agent</artifactId>
+                            <version>${applicationinsights.agent.version}</version>
+                            <outputDirectory>${project.build.directory}/agent</outputDirectory>
+                            <destFileName>applicationinsights-agent.jar</destFileName>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
