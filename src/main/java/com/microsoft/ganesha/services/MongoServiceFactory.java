@@ -19,11 +19,11 @@ public class MongoServiceFactory {
 
     
     public MongoService create() {
-        String serviceType = config.getMongoServiceName();
-        if ("mongoDatabaseService".equalsIgnoreCase(serviceType)) {
-            return new MongoDatabaseService(mongoClient, config);
-        }else {
+        String constring = config.getAzureCosmosConnString();
+        if (constring == null || constring.trim().isEmpty()) {
             return new InMemoryMongoService();
+        }else {
+            return new MongoDatabaseService(mongoClient, config);
         } 
     }
 }

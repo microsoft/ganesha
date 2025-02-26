@@ -40,9 +40,6 @@ public class AppConfig {
     @Value("${AZURE_COSMOS_DATABASE}")
     private String azureCosmosDatabase;
 
-    @Value("${mongoServiceName}")
-    private String mongoServiceName;
-
     public String getAzureClientKey() {
         return azureClientKey;
     }
@@ -85,9 +82,5 @@ public class AppConfig {
 
     public String getAzureCosmosDatabase() {
         return azureCosmosDatabase;
-    }
-
-    public String getMongoServiceName() {
-        return mongoServiceName;
     }
 }
