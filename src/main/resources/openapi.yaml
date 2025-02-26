@@ -11,16 +11,19 @@ paths:
     get:
       summary: Get Rx Claims By Member
       description: |-
-        Retrieves RX Claims for a given member id.
+        Retrieves RX Claims for a given member ID.
         Returns an empty JSON array if no claims are found.
-      operationId: get_rx_claims_by_member_rxclaims_member__member_id__get
+        This endpoint is similar to the get_all_claims endpoint, but it only returns claims for a single member.
+      operationId: getRxClaimsByMember
       parameters:
         - name: member_id
           in: path
           required: true
+          description: The ID of the member whose RX claims are being retrieved. 
+          example: 12345
           schema:
-            type: string
-            title: Member Id
+            type: integer
+            title: Member ID          
       responses:
         '200':
           description: Successful Response
@@ -30,7 +33,8 @@ paths:
                 type: array
                 items:
                   type: object
-                title: Response Get Rx Claims By Member Rxclaims Member  Member Id  Get
+                title: Rx Claims
+                example: [{"claim_id": 1, "member_id": 12345, "drug_name": "Drug A", "amount": 100}]
         '422':
           description: Validation Error
           content:
