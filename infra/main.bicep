@@ -179,6 +179,18 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
   }
 }
 
+module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = {
+  name: 'application-insights'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: '${abbrs.insightsComponents}${resourceToken}'
+    location: location
+    tags: tags
+    applicationType: 'web'
+    workspaceResourceId: logAnalyticsWorkspace.outputs.resourceId
+  }
+}
+
 module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.8.0' = {
   name: 'container-apps-env'
   scope: resourceGroup(rg.name)
@@ -227,6 +239,10 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           name: 'azure-client-key'
           value: cognitive.outputs.key
         }
+        {
+          name: 'app-insights-connection-string'
+          value: applicationInsights.outputs.connectionString
+        }
         // ** Using in-memory storage. Uncomment to enable mongoDB service.
         // {
         //   name: 'azure-cosmos-connection-string'
@@ -266,6 +282,10 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           {
             name: 'DEPLOYMENT_NAME'
             value: deploymentName
+          }
+          {
+            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+            secretRef: 'app-insights-connection-string' 
           }
           // ** Using in-memory storage. Uncomment to enable mongoDB service.
           // {
