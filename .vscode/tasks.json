@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "maven clean package",
+			"label": "mvn-clean-package",
 			"command": "mvn clean package",
 			"type": "shell",
 			"group": {
@@ -11,7 +11,8 @@
 			},
 			"options": {
 				"cwd": "${workspaceFolder}"
-			}
+			},
+            "problemMatcher": []
 		}
 	]
 }
