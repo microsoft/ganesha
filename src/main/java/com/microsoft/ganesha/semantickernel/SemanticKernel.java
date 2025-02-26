@@ -120,7 +120,8 @@ public class SemanticKernel {
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)
                 KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
                                 "CallerActivitiesPlugin");
-
+                
+                // file location using CLASSPATH is found at src/main/java/com/microsoft/ganesha/resources
                 String yaml = EmbeddedResourceLoader.readFile("/openapi.yaml", this.getClass(),EmbeddedResourceLoader.ResourceLocation.CLASSPATH);
                 KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
                 .builder()
