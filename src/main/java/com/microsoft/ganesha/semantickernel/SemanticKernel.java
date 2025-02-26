@@ -39,13 +39,6 @@ import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionServic
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 
-
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
-//import io.opentelemetry.context.Scope;
-
 @Component
 @Scope("singleton")
 public class SemanticKernel {
@@ -65,7 +58,6 @@ public class SemanticKernel {
         public SemanticKernel(AppConfig config) {
                 TokenCredential credential = null;
                 OpenAIAsyncClient client;
-
 
                 if (config.getAzureClientSecret() != null && !config.getAzureClientSecret().isEmpty()) {
                         credential = new ClientSecretCredentialBuilder()
@@ -151,13 +143,14 @@ public class SemanticKernel {
                                         //Tracer tracer = GlobalOpenTelemetry
                                         //                .getTracer("TelemetryFilteredBaseOnSpanEvents", "1.0-SNAPSHOT");
                                         //Span span = tracer.spanBuilder("mySpan").startSpan(); // create a span
-                                        Span span = Span.current();
-                                        span.addEvent("Pre-chat completion hook"); // add an event to the span
-                                        span.setAttribute("customDimensions.myCustomAttribute", "myCustomAttributeValue");
+                                        //Span span = Span.current();
+                                        //span.addEvent("Pre-chat completion hook"); // add an event to the span
+                                        //span.setAttribute("customDimensions.myCustomAttribute", "myCustomAttributeValue");
                                         
                                         // Span span = tracer.spanBuilder("Pre-chat completion").startSpan();
                                         // span.makeCurrent();
                                         // context.setAttribute("otelSpan", span);
+                                        //span.end();
                                         System.out.println("Pre-chat completion hook");
                                         return context;
                                 });
