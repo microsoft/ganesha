@@ -18,7 +18,8 @@
                 "pattern": "Tomcat initialized with port ([0-9]+)",
                 "uriFormat": "http://localhost:%s/",
                 "action": "openExternally"
-            }
+            },
+            "preLaunchTask": "maven clean package"
         }
     ]
 }

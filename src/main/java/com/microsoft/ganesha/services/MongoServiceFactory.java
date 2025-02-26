@@ -19,11 +19,6 @@ public class MongoServiceFactory {
 
     
     public MongoService create() {
-        String constring = config.getAzureCosmosConnString();
-        if (constring == null || constring.trim().isEmpty()) {
-            return new InMemoryMongoService();
-        }else {
-            return new MongoDatabaseService(mongoClient, config);
-        } 
+        return new MongoDatabaseService(mongoClient, config);
     }
 }

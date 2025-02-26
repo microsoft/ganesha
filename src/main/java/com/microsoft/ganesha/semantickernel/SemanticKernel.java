@@ -97,7 +97,7 @@ public class SemanticKernel {
                         if (config.getAzureTenantId() != null && !config.getAzureTenantId().isEmpty()) {
                                 builder.tenantId(config.getAzureTenantId());
                         }
-                        
+
                         if (config.getAzureClientId() != null && !config.getAzureClientId().isEmpty()) {
                                 builder.managedIdentityClientId(config.getAzureClientId());
                         }
@@ -114,7 +114,7 @@ public class SemanticKernel {
                 // Create your AI service client
                 ChatCompletionService chatService = OpenAIChatCompletion.builder()
                                 .withModelId(config.getModelId())
-                                .withDeploymentName(config.getDeploymentName())                                
+                                .withDeploymentName(config.getDeploymentName())
                                 .withOpenAIAsyncClient(client)
                                 .build();
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)
@@ -156,12 +156,24 @@ public class SemanticKernel {
 
                 hook.addPreChatCompletionHook(
                                 (context) -> {
+                                        //Tracer tracer = GlobalOpenTelemetry
+                                        //                .getTracer("TelemetryFilteredBaseOnSpanEvents", "1.0-SNAPSHOT");
+                                        //Span span = tracer.spanBuilder("mySpan").startSpan(); // create a span
+                                        //Span span = Span.current();
+                                        //span.addEvent("Pre-chat completion hook"); // add an event to the span
+                                        //span.setAttribute("customDimensions.myCustomAttribute", "myCustomAttributeValue");
+                                        
+                                        // Span span = tracer.spanBuilder("Pre-chat completion").startSpan();
+                                        // span.makeCurrent();
+                                        // context.setAttribute("otelSpan", span);
+                                        //span.end();
                                         System.out.println("Pre-chat completion hook");
                                         return context;
                                 });
 
                 hook.addPostChatCompletionHook(
                                 (context) -> {
+
                                         System.out.println("Post-chat completion hook");
                                         return context;
                                 });

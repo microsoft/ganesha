@@ -6,15 +6,11 @@ AZURE_TENANT_ID:
 AZURE_CLIENT_SECRET:
 AZURE_PROJECT_ID:
 AZURE_COSMOS_CONN_STR:
-#AZURE_COSMOS_CONN_STR: mongodb+srv://skraymo:1234qwer!!@krtestmogodb1244.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000
 AZURE_COSMOS_COLLECTION:
 AZURE_COSMOS_DATABASE:
 DEPLOYMENT_NAME: 
-#Leave blank for in memory 
-mongoServiceName: 
-#Uncomment below to use MongoDB
-#mongoServiceName: mongoDatabaseService
+USE_OPENAPI_PLUGIN:
 
 spring:
   config:
-    import: application-local.yml
+    import: application-local.yml  
