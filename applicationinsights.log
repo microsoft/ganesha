@@ -1,0 +1,4 @@
+2025-02-26 00:50:08.096Z INFO  c.m.a.a.i.c.ConfigurationBuilder - Some telemetry may be sampled out because a default sampling configuration was added in version 3.4.0 to reduce the default billing cost. You can set the sampling configuration explicitly: https://learn.microsoft.com/azure/azure-monitor/app/java-standalone-config#sampling
+2025-02-26 00:50:10.669Z INFO  c.m.applicationinsights.agent - Application Insights Java Agent 3.7.0 started successfully (PID 17642, JVM running for 4.281 s)
+2025-02-26 00:50:10.673Z INFO  c.m.applicationinsights.agent - Java version: 17.0.13, vendor: Microsoft, home: /usr/lib/jvm/msopenjdk-current
+2025-02-26 00:51:08.984Z ERROR c.a.c.h.netty.NettyAsyncHttpClient - io.netty.channel.AbstractChannel$AnnotatedConnectException: finishConnect(..) failed: Connection refused: /169.254.169.254:80
