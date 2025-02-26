@@ -122,19 +122,18 @@ public class SemanticKernel {
                                 "CallerActivitiesPlugin");
 
                 String yaml = EmbeddedResourceLoader.readFile("/openapi.yaml", this.getClass(),EmbeddedResourceLoader.ResourceLocation.CLASSPATH);
-                System.out.println("Loaded YAML:\n" + yaml);
-                // KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
-                // .builder()
-                // .withPluginName("rxclaim")
-                // .withSchema(yaml)
-                // .withServer("http://127.0.0.1:8000/api/v3")
-                // .build();
+                KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
+                .builder()
+                .withPluginName("rxclaim")
+                .withSchema(yaml)
+                .withServer("http://127.0.0.1:8000")
+                .build();
 
                 // Create a kernel with Azure OpenAI chat completion and plugin
                 Kernel.Builder builder = Kernel.builder();
                 builder.withAIService(ChatCompletionService.class, chatService);
                 builder.withPlugin(callerActivitiesPlugin);
-                //builder.withPlugin(rxClaimPlugin);
+                builder.withPlugin(rxClaimPlugin);
                 // Build the kernel
                 Kernel kernel = builder.build();
 
