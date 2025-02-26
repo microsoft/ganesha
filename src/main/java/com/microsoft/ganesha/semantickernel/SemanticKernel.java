@@ -126,7 +126,6 @@ public class SemanticKernel {
                 .builder()
                 .withPluginName("rxclaim")
                 .withSchema(yaml)
-                .withServer("http://127.0.0.1:8000")
                 .build();
 
                 // Create a kernel with Azure OpenAI chat completion and plugin
