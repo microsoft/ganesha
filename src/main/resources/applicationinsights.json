@@ -1,0 +1,6 @@
+{
+    "connectionString": "InstrumentationKey=1b3e95bb-666f-4263-882d-601f738b81ac;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=b7954ff2-3fb7-4497-8ec8-f151afc1c1df",
+    "role": {
+      "name": "ganesha"
+    }
+  }
