@@ -1,0 +1,68 @@
+openapi: 3.1.0
+info:
+  title: RX Claims API
+  description: API for serving RX Claims
+  version: 1.0.0
+paths:
+  /rxclaims/member/{member_id}:
+    get:
+      summary: Get Rx Claims By Member
+      description: 'Retrieves RX Claims for a given member id.
+
+        Returns an empty JSON array if no claims are found.'
+      operationId: get_rx_claims_by_member_rxclaims_member__member_id__get
+      parameters:
+      - name: member_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Member Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                title: Response Get Rx Claims By Member Rxclaims Member  Member Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

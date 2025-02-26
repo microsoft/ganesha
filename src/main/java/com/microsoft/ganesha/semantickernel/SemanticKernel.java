@@ -1,5 +1,6 @@
 package com.microsoft.ganesha.semantickernel;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,6 @@ import com.azure.core.credential.TokenRequestContext;
 import com.azure.core.http.HttpPipeline;
 import com.azure.core.http.HttpPipelineBuilder;
 import com.azure.core.http.policy.HttpPipelinePolicy;
-import com.azure.core.util.ClientOptions;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.google.gson.Gson;
@@ -35,7 +35,6 @@ import com.microsoft.semantickernel.plugin.KernelPlugin;
 import com.microsoft.semantickernel.plugin.KernelPluginFactory;
 import com.microsoft.semantickernel.semanticfunctions.KernelFunction;
 import com.microsoft.semantickernel.semanticfunctions.KernelFunctionArguments;
-import com.microsoft.ganesha.importer.RXClaimImporter;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
@@ -57,7 +56,7 @@ public class SemanticKernel {
                         - [medication name] from date [prescription date] in Entered state
                         """;
 
-        public SemanticKernel(AppConfig config) {
+        public SemanticKernel(AppConfig config) throws FileNotFoundException {
                 TokenCredential credential = null;
                 OpenAIAsyncClient client;
 
@@ -120,20 +119,20 @@ public class SemanticKernel {
                 KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
                                 "CallerActivitiesPlugin");
 
-
-                String yaml = EmbeddedResourceLoader.readFile("rxclaim.yaml", RXClaimImporter.class);
-
-                KernelPlugin plugin = SemanticKernelOpenAPIImporter
-                .builder()
-                .withPluginName("rxclaim")
-                .withSchema(yaml)
-                .withServer("http://localhost:8090/api/v3")
-                .build();
+                String yaml = EmbeddedResourceLoader.readFile("/openapi.yaml", this.getClass(),EmbeddedResourceLoader.ResourceLocation.CLASSPATH);
+                System.out.println("Loaded YAML:\n" + yaml);
+                // KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
+                // .builder()
+                // .withPluginName("rxclaim")
+                // .withSchema(yaml)
+                // .withServer("http://127.0.0.1:8000/api/v3")
+                // .build();
 
                 // Create a kernel with Azure OpenAI chat completion and plugin
                 Kernel.Builder builder = Kernel.builder();
                 builder.withAIService(ChatCompletionService.class, chatService);
                 builder.withPlugin(callerActivitiesPlugin);
+                //builder.withPlugin(rxClaimPlugin);
                 // Build the kernel
                 Kernel kernel = builder.build();
 
