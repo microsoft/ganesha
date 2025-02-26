@@ -10,10 +10,10 @@ AZURE_COSMOS_COLLECTION:
 AZURE_COSMOS_DATABASE:
 DEPLOYMENT_NAME: 
 #Leave blank for in memory 
-mongoServiceName: 
+mongoServiceName: mongoDatabaseService
 #Uncomment below to use MongoDB
 #mongoServiceName: mongoDatabaseService
 
 spring:
   config:
-    import: application-local.yml
+    import: application-local.yml  

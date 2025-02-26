@@ -10,7 +10,4 @@ services:
     
   db:
     image: mongo
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mongodb
-      MONGO_INITDB_ROOT_PASSWORD: mongodb
+    restart: unless-stopped    
