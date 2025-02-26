@@ -13,12 +13,12 @@
                 "spring-boot:run"
             ],
             "vmArgs": "-Dotel.java.global-autoconfigure.enabled=true",
+            "preLaunchTask": "mvn-clean-package",
             "serverReadyAction": {
                 "pattern": "Tomcat initialized with port ([0-9]+)",
                 "uriFormat": "http://localhost:%s/",
                 "action": "openExternally"
-            },
-            "preLaunchTask": "maven clean package"
+            }
         }
     ]
 }

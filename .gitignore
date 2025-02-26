@@ -36,5 +36,4 @@ src/main/resources/application-local.yml
 
 __blobstorage__
 __queuestorage__
-
 applicationinsights.log
