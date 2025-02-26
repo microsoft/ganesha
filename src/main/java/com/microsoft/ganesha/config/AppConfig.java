@@ -40,6 +40,9 @@ public class AppConfig {
     @Value("${AZURE_COSMOS_DATABASE}")
     private String azureCosmosDatabase;
 
+    @Value("${USE_OPENAPI_PLUGIN:false}")
+    private String useOpenAPIPlugin;
+
     public String getAzureClientKey() {
         return azureClientKey;
     }
@@ -82,5 +85,11 @@ public class AppConfig {
 
     public String getAzureCosmosDatabase() {
         return azureCosmosDatabase;
+    }
+
+    public boolean useOpenAPI() {
+        if (useOpenAPIPlugin.equals("true"))
+            return true;
+        return false;
     }
 }

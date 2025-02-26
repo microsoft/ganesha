@@ -121,19 +121,24 @@ public class SemanticKernel {
                 KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
                                 "CallerActivitiesPlugin");
                 
-                // file location using CLASSPATH is found at src/main/java/com/microsoft/ganesha/resources
-                String yaml = EmbeddedResourceLoader.readFile("/openapi.yaml", this.getClass(),EmbeddedResourceLoader.ResourceLocation.CLASSPATH);
-                KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
-                .builder()
-                .withPluginName("rxclaim")
-                .withSchema(yaml)
-                .build();
+               
 
                 // Create a kernel with Azure OpenAI chat completion and plugin
                 Kernel.Builder builder = Kernel.builder();
                 builder.withAIService(ChatCompletionService.class, chatService);
                 builder.withPlugin(callerActivitiesPlugin);
-                builder.withPlugin(rxClaimPlugin);
+                
+                //Feature Flag to use the openapi plugin
+                if(config.useOpenAPI()){
+                        // file location using CLASSPATH is found at src/main/java/com/microsoft/ganesha/resources
+                        String yaml = EmbeddedResourceLoader.readFile("/openapi.yaml", this.getClass(),EmbeddedResourceLoader.ResourceLocation.CLASSPATH);
+                        KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
+                        .builder()
+                        .withPluginName("rxclaim")
+                        .withSchema(yaml)
+                        .build();
+                        builder.withPlugin(rxClaimPlugin);
+                }
                 // Build the kernel
                 Kernel kernel = builder.build();
 
