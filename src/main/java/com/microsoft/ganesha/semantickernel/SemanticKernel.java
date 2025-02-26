@@ -1,5 +1,6 @@
 package com.microsoft.ganesha.semantickernel;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatC
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypeConverter;
 import com.microsoft.semantickernel.contextvariables.ContextVariableTypes;
 import com.microsoft.semantickernel.hooks.KernelHooks;
+import com.microsoft.semantickernel.implementation.EmbeddedResourceLoader;
 import com.microsoft.semantickernel.orchestration.InvocationContext;
 import com.microsoft.semantickernel.orchestration.InvocationContext.Builder;
 import com.microsoft.semantickernel.orchestration.InvocationReturnMode;
@@ -55,7 +57,7 @@ public class SemanticKernel {
                         - [medication name] from date [prescription date] in Entered state
                         """;
 
-        public SemanticKernel(AppConfig config) {
+        public SemanticKernel(AppConfig config) throws FileNotFoundException {
                 TokenCredential credential = null;
                 OpenAIAsyncClient client;
 
@@ -118,11 +120,25 @@ public class SemanticKernel {
                 // Create a plugin (the CallerActivitiesPlugin class is defined separately)
                 KernelPlugin callerActivitiesPlugin = KernelPluginFactory.createFromObject(new CallerActivitiesPlugin(),
                                 "CallerActivitiesPlugin");
+                
+               
 
                 // Create a kernel with Azure OpenAI chat completion and plugin
                 Kernel.Builder builder = Kernel.builder();
                 builder.withAIService(ChatCompletionService.class, chatService);
                 builder.withPlugin(callerActivitiesPlugin);
+                
+                //Feature Flag to use the openapi plugin
+                if(config.useOpenAPI()){
+                        // file location using CLASSPATH is found at src/main/java/com/microsoft/ganesha/resources
+                        String yaml = EmbeddedResourceLoader.readFile("/openapi.yaml", this.getClass(),EmbeddedResourceLoader.ResourceLocation.CLASSPATH);
+                        KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
+                        .builder()
+                        .withPluginName("rxclaim")
+                        .withSchema(yaml)
+                        .build();
+                        builder.withPlugin(rxClaimPlugin);
+                }
                 // Build the kernel
                 Kernel kernel = builder.build();
 

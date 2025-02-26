@@ -25,6 +25,6 @@ public class CosmosDBConfig {
             .applyConnectionString(connectionString)
             .build();
 
-        return MongoClients.create(mongoClientSettings);
+        return MongoClients.create(mongoClientSettings);        
     }
 }

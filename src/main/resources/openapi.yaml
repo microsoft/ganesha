@@ -1,0 +1,75 @@
+openapi: 3.0.1
+info:
+  title: RX Claims API
+  description: API for serving RX Claims
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local development server
+paths:
+  /rxclaims/member/{member_id}:
+    get:
+      summary: Get Rx Claims By Member
+      description: |-
+        Retrieves RX Claims for a given member ID.
+        Returns an empty JSON array if no claims are found.
+        This endpoint is similar to the get_all_claims endpoint, but it only returns claims for a single member.
+      operationId: getRxClaimsByMember
+      parameters:
+        - name: member_id
+          in: path
+          required: true
+          description: The ID of the member whose RX claims are being retrieved. 
+          example: 12345
+          schema:
+            type: integer
+            title: Member ID          
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                title: Rx Claims
+                example: [{"claim_id": 1, "member_id": 12345, "drug_name": "Drug A", "amount": 100}]
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError

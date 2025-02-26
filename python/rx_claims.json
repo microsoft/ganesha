@@ -1,0 +1,29 @@
+[
+    {
+        "claim_id": "5915d320-31ec-4708-a943-be3077ac24d3",
+        "member_id": "12345",
+        "patient_info": "John Doe",
+        "pharmacy": "Pharmacy A",
+        "script": "Medication A",
+        "script_instructions": "Take one pill daily",
+        "date": "2025-02-24"
+    },
+    {
+        "claim_id": "b6682698-2d03-4b7d-9fa7-ef817a2c9bec",
+        "member_id": "848494",
+        "patient_info": "Jane Smith",
+        "pharmacy": "Pharmacy B",
+        "script": "Medication B",
+        "script_instructions": "Take two pills daily",
+        "date": "2025-02-20"
+    } ,
+    {
+        "claim_id": "b2389e59-93cb-4bca-b0a3-68f507e713fd",
+        "member_id": "12345",
+        "patient_info": "John Doe",
+        "pharmacy": "Pharmacy A",
+        "script": "Medication C",
+        "script_instructions": "Take 12 pills daily",
+        "date": "2025-02-24"
+    }
+]
