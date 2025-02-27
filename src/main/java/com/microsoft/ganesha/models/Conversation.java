@@ -34,8 +34,7 @@ public class Conversation {
         messages = chatHistory
                 .getMessages()
                 .stream()
-                .filter(r -> !r.getAuthorRole().equals(AuthorRole.SYSTEM)
-                        && !r.getAuthorRole().equals(AuthorRole.TOOL))
+                .filter(r -> !r.getAuthorRole().equals(AuthorRole.SYSTEM))
                 .map(r -> {
                     var date = Optional.ofNullable(r.getMetadata())
                             .map(metadata -> metadata.getCreatedAt())
@@ -89,6 +88,9 @@ public class Conversation {
                     break;
                 case "ASSISTANT":
                     chatHistory.addAssistantMessage(message.getMessage());
+                    break;
+                case "TOOL":
+                    chatHistory.addMessage(AuthorRole.TOOL, message.getMessage());
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown author role: " + message.getRole());
