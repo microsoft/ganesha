@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.ai.openai.OpenAIServiceVersion;
+import com.azure.ai.openai.models.CompletionsUsage;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
 import com.azure.core.http.HttpPipeline;
@@ -40,6 +41,12 @@ import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
+
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
 
 @Component
 @Scope("singleton")
@@ -156,23 +163,44 @@ public class SemanticKernel {
 
                 hook.addPreChatCompletionHook(
                                 (context) -> {
-                                        //Tracer tracer = GlobalOpenTelemetry
+                                        // Tracer tracer = GlobalOpenTelemetry
                                         //                .getTracer("TelemetryFilteredBaseOnSpanEvents", "1.0-SNAPSHOT");
-                                        //Span span = tracer.spanBuilder("mySpan").startSpan(); // create a span
-                                        //Span span = Span.current();
-                                        //span.addEvent("Pre-chat completion hook"); // add an event to the span
-                                        //span.setAttribute("customDimensions.myCustomAttribute", "myCustomAttributeValue");
+                                        // Attributes attributes = Attributes.of(
+                                        //         AttributeKey.stringKey("gen_ai.system"), "az.ai.openai",
+                                        //         AttributeKey.stringKey("gen_ai.operation.name"), "chat"
+                                        // );
+                                        // Span span = tracer.spanBuilder("chat")
+                                        //         .setAllAttributes(attributes)
+                                        //         .startSpan(); // create a span
+                                        // //Span span = Span.current();
                                         
-                                        // Span span = tracer.spanBuilder("Pre-chat completion").startSpan();
-                                        // span.makeCurrent();
-                                        // context.setAttribute("otelSpan", span);
-                                        //span.end();
+                                        // span.addEvent("Pre-chat completion hook", attributes); // add an event to the span
+                                        // //span.setAttribute("customDimensions.myCustomAttribute", "myCustomAttributeValue");
+                                        
+                                        // //Span span = tracer.spanBuilder("Pre-chat completion").startSpan();
+                                        // //span.makeCurrent();
+                                        // span.end();
+                                        
+                                        Span.current().addEvent("Pre-chat completion hook");
                                         System.out.println("Pre-chat completion hook");
                                         return context;
                                 });
 
                 hook.addPostChatCompletionHook(
-                                (context) -> {
+                                (context) -> {  
+                                        Tracer tracer = GlobalOpenTelemetry
+                                                        .getTracer("SemanticKernel");
+                                        
+                                        CompletionsUsage usage = context.getChatCompletions().getUsage();
+                                        Span span = tracer.spanBuilder("chat")
+                                                .setAttribute("gen_ai.usage.output_tokens", usage.getCompletionTokens())
+                                                .setAttribute("gen_ai.usage.input_tokens", usage.getPromptTokens())
+                                                .setAttribute("gen_ai.system","az.ai.openai")
+                                        //         AttributeKey.stringKey("gen_ai.operation.name"), "chat"
+                                                .startSpan();
+
+                                        span.addEvent("Post-chat completion hook");
+                                        span.end();
 
                                         System.out.println("Post-chat completion hook");
                                         return context;
