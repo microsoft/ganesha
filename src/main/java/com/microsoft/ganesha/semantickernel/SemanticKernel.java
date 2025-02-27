@@ -156,17 +156,7 @@ public class SemanticKernel {
 
                 hook.addPreChatCompletionHook(
                                 (context) -> {
-                                        //Tracer tracer = GlobalOpenTelemetry
-                                        //                .getTracer("TelemetryFilteredBaseOnSpanEvents", "1.0-SNAPSHOT");
-                                        //Span span = tracer.spanBuilder("mySpan").startSpan(); // create a span
-                                        //Span span = Span.current();
-                                        //span.addEvent("Pre-chat completion hook"); // add an event to the span
-                                        //span.setAttribute("customDimensions.myCustomAttribute", "myCustomAttributeValue");
                                         
-                                        // Span span = tracer.spanBuilder("Pre-chat completion").startSpan();
-                                        // span.makeCurrent();
-                                        // context.setAttribute("otelSpan", span);
-                                        //span.end();
                                         System.out.println("Pre-chat completion hook");
                                         return context;
                                 });
