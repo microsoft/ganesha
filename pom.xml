@@ -72,35 +72,35 @@
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-api</artifactId>
-            <version>1.4.2</version>
+            <version>1.4.3</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-data-azureaisearch</artifactId>
-            <version>1.4.2</version>
+            <version>1.4.3</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-data-jdbc</artifactId>
-            <version>1.4.2</version>
+            <version>1.4.3</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-data-redis</artifactId>
-            <version>1.4.2</version>
+            <version>1.4.3</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-experimental</artifactId>
-            <version>1.4.2</version>
+            <version>1.4.3</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.semantic-kernel</groupId>
             <artifactId>semantickernel-aiservices-huggingface</artifactId>
-            <version>1.4.2</version>
+            <version>1.4.3</version>
         </dependency>
 
         <dependency>
