@@ -34,7 +34,7 @@ public class Conversation {
         messages = chatHistory
                 .getMessages()
                 .stream()
-                .filter(r -> !r.getAuthorRole().equals(AuthorRole.SYSTEM))
+                //.filter(r -> !r.getAuthorRole().equals(AuthorRole.SYSTEM))
                 .map(r -> {
                     var date = Optional.ofNullable(r.getMetadata())
                             .map(metadata -> metadata.getCreatedAt())

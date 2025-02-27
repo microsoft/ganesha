@@ -1,6 +1,7 @@
 package com.microsoft.ganesha.controller;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,10 @@ import com.microsoft.ganesha.semantickernel.SemanticKernel;
 import com.microsoft.ganesha.services.MongoServiceFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
+import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
+import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
+import com.microsoft.semantickernel.services.chatcompletion.message.ChatMessageContentType;
+import com.microsoft.semantickernel.services.chatcompletion.message.ChatMessageTextContent;
 
 @RestController
 public class SemanticKernelController {
@@ -45,9 +50,18 @@ public class SemanticKernelController {
     }
 
     @PostMapping("/predictReason")
-    String predictReason(@RequestBody MemberIdRequest memberid)
+    ChatHistory predictReason(@RequestBody MemberIdRequest request)
             throws SemanticKernelException, ServiceNotFoundException {
-        return _kernel.GetReasons(memberid.GetMemberId());
+        try {
+            var response = _kernel.GetReasons(request.getMemberId());
+
+            // persist this ChatHistory object to MongoDB
+            _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
+
+            return response;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/conversation")
@@ -116,10 +130,12 @@ public class SemanticKernelController {
             _mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                String reason = _kernel.GetReasons(conversation.getMessages().get(0).getMessage());
+                ChatHistory reason = _kernel.GetReasons(conversation.getMessages().get(0).getMessage());
 
                 if (reason != null) {
-                    var reasonMessage = new DisplayChatMessage(reason, AuthorRole.ASSISTANT.toString(),
+                    ListIterator<ChatMessageContent<?>> iterator = reason.getMessages().listIterator();
+                    var reasonMessage = new DisplayChatMessage(iterator.previous().getContent(),
+                            AuthorRole.ASSISTANT.toString(),
                             java.time.OffsetDateTime.now());
 
                     conversation.getMessages().add(reasonMessage);

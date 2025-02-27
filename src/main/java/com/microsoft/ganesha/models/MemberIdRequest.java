@@ -1,9 +1,18 @@
 package com.microsoft.ganesha.models;
 
-public class MemberIdRequest {
-    private String memberid;
+import java.util.UUID;
 
-    public String GetMemberId() {
-        return this.memberid;
+public class MemberIdRequest {
+    private String memberId;
+    private UUID conversationId;
+
+    // @JsonProperty("memberid")
+    public String getMemberId() {
+        return this.memberId;
+    }
+
+    // @JsonProperty("conversationid")
+    public UUID getConversationId() {
+        return this.conversationId;
     }
 }

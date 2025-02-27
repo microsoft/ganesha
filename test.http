@@ -14,7 +14,7 @@ POST  http://localhost:8080/predictReason
 Content-Type: application/json
 
 {
-    "memberid": "12345"
+    "memberId": "12345"
 }
 ###
 
