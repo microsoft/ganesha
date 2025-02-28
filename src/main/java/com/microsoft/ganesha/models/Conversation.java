@@ -1,20 +1,15 @@
 package com.microsoft.ganesha.models;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import com.microsoft.ganesha.data.OpenAIFunctionToolCallCodec;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatMessageContent;
-import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIFunctionToolCall;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
-import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 
 import org.bson.BsonDocumentReader;
-import org.bson.BsonReader;
 import org.bson.Document;
 
 public class Conversation {
