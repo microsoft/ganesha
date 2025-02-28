@@ -69,6 +69,9 @@ public class Conversation {
                             break;
                         case "ASSISTANT":                            
                             var toolCallsDocuments = m.getList("toolCall", Document.class);
+                            if (toolCallsDocuments == null) {
+                                toolCallsDocuments = List.of();
+                            }
                             var toolCalls = toolCallsDocuments.stream()
                                     .map(d -> new OpenAIFunctionToolCallCodec()
                                             .decode(new BsonDocumentReader(d.toBsonDocument()), null))
