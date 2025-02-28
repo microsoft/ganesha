@@ -33,7 +33,6 @@ public class Conversation {
         this.chatHistory = new ChatHistory();
         messages
                 .stream()
-                //.filter(r -> !r.getAuthorRole().equals(AuthorRole.SYSTEM))
                 .forEach(m -> {
                     switch (m.getRole().toUpperCase()) {
                         case "USER":
@@ -56,7 +55,29 @@ public class Conversation {
 
     public Conversation(Document document) {
         this.conversationId = UUID.fromString(document.getString("conversationId"));
-        this.chatHistory = document.get("chatHistory", ChatHistory.class);
+        var messages = document.getList("chatHistory", Document.class);
+        this.chatHistory = new ChatHistory();  
+        messages.stream()
+                .forEach(m -> {
+                    switch (m.getString("authorRole").toUpperCase()) {
+                        case "USER":
+                            chatHistory.addUserMessage(m.getString("content"));
+                            break;
+                        case "SYSTEM":
+                            chatHistory.addSystemMessage(m.getString("content"));
+                            break;
+                        case "ASSISTANT":
+                            // missing tool call information
+                            // try using toJSON or BsonSerializer to deserialize the BsonDocument into OpenAIChatMessageContent
+                            chatHistory.addAssistantMessage(m.getString("content"));
+                            break;
+                        case "TOOL":
+                            chatHistory.addMessage(AuthorRole.TOOL, m.getString("content"));                            
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unknown author role: " + m.getString("authorRole"));
+                    }
+                });
     }
 
     public UUID getConversationId() {
