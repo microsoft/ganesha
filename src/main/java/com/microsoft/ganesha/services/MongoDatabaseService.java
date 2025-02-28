@@ -52,13 +52,9 @@ public class MongoDatabaseService implements MongoService {
     }
 
     @Override
-    public void UpsertConversation(Conversation conversation) throws Exception {
-        CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
-                    CodecRegistries.fromCodecs(new ChatMessageTextContentCodec(), new OpenAIChatMessageContentCodec()),
-                    MongoClientSettings.getDefaultCodecRegistry());
-
+    public void UpsertConversation(Conversation conversation) throws Exception {        
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection()).withCodecRegistry(codecRegistry);
+        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
 
         Document document = new Document("conversationId", conversation.getConversationId().toString())
                 .append("chatHistory",
