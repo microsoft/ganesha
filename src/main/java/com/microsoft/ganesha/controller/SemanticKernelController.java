@@ -1,6 +1,7 @@
 package com.microsoft.ganesha.controller;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,8 @@ import com.microsoft.ganesha.semantickernel.SemanticKernel;
 import com.microsoft.ganesha.services.MongoServiceFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
+import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
+import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 
 @RestController
 public class SemanticKernelController {
@@ -45,9 +48,18 @@ public class SemanticKernelController {
     }
 
     @PostMapping("/predictReason")
-    String predictReason(@RequestBody MemberIdRequest memberid)
+    ChatHistory predictReason(@RequestBody MemberIdRequest request)
             throws SemanticKernelException, ServiceNotFoundException {
-        return _kernel.GetReasons(memberid.GetMemberId());
+        try {
+            var response = _kernel.GetReasons(request.getMemberId());
+
+            // persist this ChatHistory object to MongoDB
+            _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
+            
+            return response;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     @GetMapping("/conversation")
@@ -59,7 +71,7 @@ public class SemanticKernelController {
 
             if (!expanded) {
                 for (var conversation : conversations) {
-                    conversation.setMessages(null);
+                    conversation.setChatHistory(null);
                 }
             }
 
@@ -92,7 +104,7 @@ public class SemanticKernelController {
             throws SemanticKernelException, ServiceNotFoundException {
         try {
 
-            if (conversation.getMessages() == null || conversation.getMessages().isEmpty()) {
+            if (conversation.getChatHistory() == null || conversation.getChatHistory().getMessages().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Conversation messages cannot be empty");
             }
 
@@ -116,16 +128,10 @@ public class SemanticKernelController {
             _mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                String reason = _kernel.GetReasons(conversation.getMessages().get(0).getMessage());
-
-                if (reason != null) {
-                    var reasonMessage = new DisplayChatMessage(reason, AuthorRole.ASSISTANT.toString(),
-                            java.time.OffsetDateTime.now());
-
-                    conversation.getMessages().add(reasonMessage);
-                }
+                ChatHistory reason = _kernel.GetReasons(conversation.getChatHistory().getMessages().get(0).getContent());
+                conversation.setChatHistory(reason);
             } else {
-                var chatHistory = _kernel.Converse(conversation.toChatHistory());
+                var chatHistory = _kernel.Converse(conversation.getChatHistory());
 
                 // right now this constructor filters out tool and system messages
                 // we may want to consider if we want to persist them for transparency?

@@ -14,7 +14,7 @@ POST  http://localhost:8080/predictReason
 Content-Type: application/json
 
 {
-    "memberid": "12345"
+    "memberId": "12345"
 }
 ###
 
@@ -46,7 +46,7 @@ Content-Type: application/json
 GET http://localhost:8080/conversation
 
 ###
-GET http://localhost:8080/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d
+GET http://localhost:8080/conversation/7dfb790d-611d-4dcc-9c63-dcd5bc57c9a8
 
 ###
 DELETE http://localhost:8080/conversation/cec7d4eb-76c2-4b15-ab86-67367ded907d

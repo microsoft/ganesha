@@ -38,6 +38,7 @@ import com.microsoft.semantickernel.plugin.KernelPluginFactory;
 import com.microsoft.semantickernel.semanticfunctions.KernelFunction;
 import com.microsoft.semantickernel.semanticfunctions.KernelFunctionArguments;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
+import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
@@ -259,10 +260,10 @@ public class SemanticKernel {
                 return "";
         }
 
-        public String GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
+        public ChatHistory GetReasons(String memberid) throws SemanticKernelException, ServiceNotFoundException {
                 // Enable planning for automatic tool calling
                 InvocationContext invocationContext = new Builder()
-                                .withReturnMode(InvocationReturnMode.LAST_MESSAGE_ONLY)
+                                .withReturnMode(InvocationReturnMode.FULL_HISTORY)
                                 .withToolCallBehavior(ToolCallBehavior.allowAllKernelFunctions(true))
                                 .withContextVariableConverter(
                                                 ContextVariableTypeConverter.builder(OrderActivities.class)
@@ -282,14 +283,24 @@ public class SemanticKernel {
 
                 // end alternative B
 
+                ChatHistory chatHistory = new ChatHistory();
+                chatHistory.addSystemMessage(getReasonsPrompt);
+                chatHistory.addUserMessage(memberid);
+
                 try {
-                        results = chatCompletionService.getChatMessageContentsAsync(
-                                        getReasonsPrompt, _kernel, invocationContext).block();
-                        return results.toString();
+                        ChatHistory resultsHistory = new ChatHistory();
+                        results = chatCompletionService
+                                .getChatMessageContentsAsync(chatHistory, _kernel, invocationContext).block();
+                        results.stream()
+                                //.filter(r -> !r.getAuthorRole().equals(AuthorRole.SYSTEM))
+                                .forEach(m -> {
+                                        resultsHistory.addMessage(m);
+                                });
+                        return resultsHistory;
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
-                return "";
+                return null;
         }
 
         // demonstrates manual function calling for a bespoke deterministic process with

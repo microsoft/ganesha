@@ -1,0 +1,224 @@
+{
+    "messages": [
+        {
+            "innerContent": null,
+            "metadata": null,
+            "authorRole": "SYSTEM",
+            "content": "You are an assistant to customer service agents for a prescription fulfillment call center. Given a provided set of activities associated with a specific member, predict the reason they would call into the call center. Include all possible reasons for a call, ordered by likelihood if the percentage of call reasons are the following:\nCancelled orders - 50%\nClosed orders - 21%\nBooked orders - 19%\nEntered orders - 10%\n##Example##\nLikely call reason in order of highest likelihood:\n- [medication name] from date [prescription date] which was canceled\n- [medication name] from date [prescription date] in Entered state\n",
+            "items": null,
+            "encoding": "UTF-8",
+            "contentType": "TEXT"
+        },
+        {
+            "innerContent": null,
+            "metadata": null,
+            "authorRole": "USER",
+            "content": "12345",
+            "items": null,
+            "encoding": "UTF-8",
+            "contentType": "TEXT"
+        },
+        {
+            "innerContent": null,
+            "metadata": null,
+            "authorRole": "ASSISTANT",
+            "content": null,
+            "items": null,
+            "encoding": "UTF-8",
+            "contentType": "TEXT",
+            "toolCall": [
+                {
+                    "id": "call_PPnNSc9knjR6ChUq5prYLtXy",
+                    "pluginName": "CallerActivitiesPlugin",
+                    "functionName": "getActivities",
+                    "arguments": {
+                        "memberid": {
+                            "type": {
+                                "clazz": "java.lang.String",
+                                "converter": {
+                                    "type": "java.lang.String"
+                                }
+                            },
+                            "value": "12345",
+                            "empty": false
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "innerContent": null,
+            "metadata": {
+                "metadata": {
+                    "id": {
+                        "type": {
+                            "clazz": "java.lang.String",
+                            "converter": {
+                                "type": "java.lang.String"
+                            }
+                        },
+                        "value": "call_PPnNSc9knjR6ChUq5prYLtXy",
+                        "empty": false
+                    }
+                },
+                "id": "call_PPnNSc9knjR6ChUq5prYLtXy",
+                "usage": null,
+                "createdAt": null
+            },
+            "authorRole": "TOOL",
+            "content": "{&quot;memberId&quot;:12345,&quot;medicationName&quot;:&quot;Lisinopril&quot;,&quot;dosage&quot;:&quot;100mg&quot;,&quot;frequency&quot;:&quot;Once a week&quot;,&quot;pharmacy&quot;:&quot;Pharmacy A&quot;,&quot;prescribingDoctor&quot;:&quot;Dr. Williams&quot;,&quot;prescriptionDate&quot;:&quot;2022-11-22&quot;,&quot;refillDates&quot;:[&quot;2023-01-22&quot;,&quot;2023-09-10&quot;],&quot;orderStatus&quot;:&quot;Booked&quot;},{&quot;memberId&quot;:12345,&quot;medicationName&quot;:&quot;Amlodipine&quot;,&quot;dosage&quot;:&quot;20mg&quot;,&quot;frequency&quot;:&quot;Once a day&quot;,&quot;pharmacy&quot;:&quot;Pharmacy C&quot;,&quot;prescribingDoctor&quot;:&quot;Dr. Williams&quot;,&quot;prescriptionDate&quot;:&quot;2022-11-11&quot;,&quot;refillDates&quot;:[&quot;2023-02-25&quot;],&quot;orderStatus&quot;:&quot;Closed&quot;}",
+            "items": null,
+            "encoding": "UTF-8",
+            "contentType": "TEXT",
+            "toolCall": null
+        },
+        {
+            "innerContent": null,
+            "metadata": {
+                "metadata": {
+                    "createdat": {
+                        "type": {
+                            "clazz": "java.time.OffsetDateTime",
+                            "converter": {
+                                "type": "java.time.OffsetDateTime"
+                            }
+                        },
+                        "value": "2025-02-27T22:06:46Z",
+                        "empty": false
+                    },
+                    "id": {
+                        "type": {
+                            "clazz": "java.lang.String",
+                            "converter": {
+                                "type": "java.lang.String"
+                            }
+                        },
+                        "value": "chatcmpl-B5gJi5761Dw44yakPubTH6un3FoCw",
+                        "empty": false
+                    },
+                    "usage": {
+                        "type": {
+                            "clazz": "java.lang.Object",
+                            "converter": {
+                                "type": "java.lang.Object"
+                            }
+                        },
+                        "value": {
+                            "completionTokens": 56,
+                            "promptTokens": 364,
+                            "totalTokens": 420,
+                            "promptTokensDetails": {
+                                "cachedTokens": 0,
+                                "audioTokens": 0
+                            },
+                            "completionTokensDetails": {
+                                "reasoningTokens": 0,
+                                "acceptedPredictionTokens": 0,
+                                "audioTokens": 0,
+                                "rejectedPredictionTokens": 0
+                            }
+                        },
+                        "empty": false
+                    }
+                },
+                "id": "chatcmpl-B5gJi5761Dw44yakPubTH6un3FoCw",
+                "usage": {
+                    "completionTokens": 56,
+                    "promptTokens": 364,
+                    "totalTokens": 420,
+                    "promptTokensDetails": {
+                        "cachedTokens": 0,
+                        "audioTokens": 0
+                    },
+                    "completionTokensDetails": {
+                        "reasoningTokens": 0,
+                        "acceptedPredictionTokens": 0,
+                        "audioTokens": 0,
+                        "rejectedPredictionTokens": 0
+                    }
+                },
+                "createdAt": "2025-02-27T22:06:46Z"
+            },
+            "authorRole": "ASSISTANT",
+            "content": "Likely call reason in order of highest likelihood:\n1. [Amlodipine] from date [2022-11-11] which was closed.\n2. [Lisinopril] from date [2022-11-22] in booked state.",
+            "items": null,
+            "encoding": "UTF-8",
+            "contentType": "TEXT",
+            "toolCall": null
+        }
+    ],
+    "lastMessage": {
+        "innerContent": null,
+        "metadata": {
+            "metadata": {
+                "createdat": {
+                    "type": {
+                        "clazz": "java.time.OffsetDateTime",
+                        "converter": {
+                            "type": "java.time.OffsetDateTime"
+                        }
+                    },
+                    "value": "2025-02-27T22:06:46Z",
+                    "empty": false
+                },
+                "id": {
+                    "type": {
+                        "clazz": "java.lang.String",
+                        "converter": {
+                            "type": "java.lang.String"
+                        }
+                    },
+                    "value": "chatcmpl-B5gJi5761Dw44yakPubTH6un3FoCw",
+                    "empty": false
+                },
+                "usage": {
+                    "type": {
+                        "clazz": "java.lang.Object",
+                        "converter": {
+                            "type": "java.lang.Object"
+                        }
+                    },
+                    "value": {
+                        "completionTokens": 56,
+                        "promptTokens": 364,
+                        "totalTokens": 420,
+                        "promptTokensDetails": {
+                            "cachedTokens": 0,
+                            "audioTokens": 0
+                        },
+                        "completionTokensDetails": {
+                            "reasoningTokens": 0,
+                            "acceptedPredictionTokens": 0,
+                            "audioTokens": 0,
+                            "rejectedPredictionTokens": 0
+                        }
+                    },
+                    "empty": false
+                }
+            },
+            "id": "chatcmpl-B5gJi5761Dw44yakPubTH6un3FoCw",
+            "usage": {
+                "completionTokens": 56,
+                "promptTokens": 364,
+                "totalTokens": 420,
+                "promptTokensDetails": {
+                    "cachedTokens": 0,
+                    "audioTokens": 0
+                },
+                "completionTokensDetails": {
+                    "reasoningTokens": 0,
+                    "acceptedPredictionTokens": 0,
+                    "audioTokens": 0,
+                    "rejectedPredictionTokens": 0
+                }
+            },
+            "createdAt": "2025-02-27T22:06:46Z"
+        },
+        "authorRole": "ASSISTANT",
+        "content": "Likely call reason in order of highest likelihood:\n1. [Amlodipine] from date [2022-11-11] which was closed.\n2. [Lisinopril] from date [2022-11-22] in booked state.",
+        "items": null,
+        "encoding": "UTF-8",
+        "contentType": "TEXT",
+        "toolCall": null
+    }
+}
