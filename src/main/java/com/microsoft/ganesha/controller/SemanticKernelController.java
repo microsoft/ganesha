@@ -30,8 +30,6 @@ import com.microsoft.semantickernel.services.ServiceNotFoundException;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
-import com.microsoft.semantickernel.services.chatcompletion.message.ChatMessageContentType;
-import com.microsoft.semantickernel.services.chatcompletion.message.ChatMessageTextContent;
 
 @RestController
 public class SemanticKernelController {
@@ -57,7 +55,7 @@ public class SemanticKernelController {
 
             // persist this ChatHistory object to MongoDB
             _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
-
+            
             return response;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -73,7 +71,7 @@ public class SemanticKernelController {
 
             if (!expanded) {
                 for (var conversation : conversations) {
-                    conversation.setMessages(null);
+                    conversation.setChatHistory(null);
                 }
             }
 
@@ -106,7 +104,7 @@ public class SemanticKernelController {
             throws SemanticKernelException, ServiceNotFoundException {
         try {
 
-            if (conversation.getMessages() == null || conversation.getMessages().isEmpty()) {
+            if (conversation.getChatHistory() == null || conversation.getChatHistory().getMessages().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Conversation messages cannot be empty");
             }
 
@@ -130,18 +128,10 @@ public class SemanticKernelController {
             _mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                ChatHistory reason = _kernel.GetReasons(conversation.getMessages().get(0).getMessage());
-
-                if (reason != null) {
-                    ListIterator<ChatMessageContent<?>> iterator = reason.getMessages().listIterator();
-                    var reasonMessage = new DisplayChatMessage(iterator.previous().getContent(),
-                            AuthorRole.ASSISTANT.toString(),
-                            java.time.OffsetDateTime.now());
-
-                    conversation.getMessages().add(reasonMessage);
-                }
+                ChatHistory reason = _kernel.GetReasons(conversation.getChatHistory().getMessages().get(0).getContent());
+                conversation.setChatHistory(reason);
             } else {
-                var chatHistory = _kernel.Converse(conversation.toChatHistory());
+                var chatHistory = _kernel.Converse(conversation.getChatHistory());
 
                 // right now this constructor filters out tool and system messages
                 // we may want to consider if we want to persist them for transparency?

@@ -1,8 +1,12 @@
 package com.microsoft.ganesha.services;
 
 import com.microsoft.ganesha.config.AppConfig;
+import com.microsoft.ganesha.data.ChatMessageTextContentCodec;
+import com.microsoft.ganesha.data.OpenAIChatMessageContentCodec;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
+import com.microsoft.semantickernel.services.chatcompletion.message.ChatMessageTextContent;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -14,6 +18,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bson.Document;
+import org.bson.codecs.IntegerCodec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +30,7 @@ public class MongoDatabaseService implements MongoService {
    
     
     private final MongoClient mongoClient;
-    private final AppConfig config;
+    private final AppConfig config;    
 
     public MongoDatabaseService(MongoClient mongoClient, AppConfig config) {
         this.mongoClient = mongoClient;
@@ -46,14 +53,16 @@ public class MongoDatabaseService implements MongoService {
 
     @Override
     public void UpsertConversation(Conversation conversation) throws Exception {
+        CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
+                    CodecRegistries.fromCodecs(new ChatMessageTextContentCodec(), new OpenAIChatMessageContentCodec()),
+                    MongoClientSettings.getDefaultCodecRegistry());
+
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
+        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection()).withCodecRegistry(codecRegistry);
 
         Document document = new Document("conversationId", conversation.getConversationId().toString())
-                .append("messages",
-                        conversation.getMessages().stream().map(message -> new Document("message", message.getMessage())
-                                .append("role", message.getRole())
-                                .append("time", message.getTime().toInstant())).toList());
+                .append("chatHistory",
+                        conversation.getChatHistory());
 
         collection.replaceOne(Filters.eq("conversationId", conversation.getConversationId().toString()), document,
                 new ReplaceOptions().upsert(true));
