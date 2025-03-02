@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import org.bson.*;
 import org.bson.codecs.*;
 
+import com.azure.ai.openai.models.CompletionsUsage;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatMessageContent;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIFunctionToolCall;
 import com.microsoft.semantickernel.orchestration.FunctionResultMetadata;
@@ -26,7 +27,7 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
 
         if (value.getMetadata() != null && (value.getMetadata().getCreatedAt() != null || value.getMetadata().getUsage() != null)) {
             FunctionResultMetadata<?> metadata = null;
-            Object usage = null;
+            CompletionsUsage usage = null;
             OffsetDateTime createdAt = null;
 
             writer.writeStartArray("metadata");            
@@ -34,8 +35,8 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
                 createdAt = (OffsetDateTime)value.getMetadata().getCreatedAt();                
             }                
             if (value.getMetadata().getUsage() != null){
-                usage = value.getMetadata().getUsage();
-            }
+                usage = (CompletionsUsage)value.getMetadata().getUsage();
+            }            
             metadata = FunctionResultMetadata.build("metadata", usage, createdAt);
             functionResultMetadataCodec.encode(writer, metadata, encoderContext);
             writer.writeEndArray();
@@ -59,8 +60,10 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
         String content = reader.readString("content");
 
         OffsetDateTime createdAt = OffsetDateTime.parse(reader.readString("createdAt"));
-        Object usage = (Object)reader.readString("usage");
         
+        Object usageObj = (Object)reader.readString("usage");
+        CompletionsUsage usage = (CompletionsUsage) usageObj;
+                     
         FunctionResultMetadata<?> metadata = FunctionResultMetadata.build(content, usage, createdAt);
 
         reader.readEndDocument();
