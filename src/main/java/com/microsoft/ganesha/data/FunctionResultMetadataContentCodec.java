@@ -1,15 +1,25 @@
 package com.microsoft.ganesha.data;
 
 import java.time.OffsetDateTime;
+import java.io.StringReader;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
 import org.bson.BsonType;
 import org.bson.codecs.*;
 
+
 import com.microsoft.semantickernel.orchestration.FunctionResultMetadata;
 import com.azure.ai.openai.models.CompletionsUsage;
+import com.azure.json.JsonReader;
+import com.azure.json.JsonOptions;
+import com.azure.json.JsonProviders;
+import java.util.Map;
+import java.util.HashMap;
+
 
 public class FunctionResultMetadataContentCodec implements Codec<FunctionResultMetadata> {
     @Override
@@ -36,16 +46,18 @@ public class FunctionResultMetadataContentCodec implements Codec<FunctionResultM
             int completionTokens = reader.readInt32("completionTokens");
             int promptTokens = reader.readInt32("promptTokens");
             int totalTokens = reader.readInt32("totalTokens");
-
+       
+            String json = String.format("{\"completionTokens\": %d, \"promptTokens\": %d, \"totalTokens\": %d}", completionTokens, promptTokens, totalTokens);
+            
+            JsonReader jsonReader = null;
             try {
-                Constructor<CompletionsUsage> constructor = CompletionsUsage.class.getDeclaredConstructor(int.class, int.class, int.class);
-                constructor.setAccessible(true);
-                usage = constructor.newInstance(completionTokens, promptTokens, totalTokens);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);    
+                jsonReader = JsonProviders.createReader(new StringReader(json), new JsonOptions());
+                usage = CompletionsUsage.fromJson(jsonReader);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
+            Map<String, Object> result = new HashMap<>();
+            result.put("usage", usage);                    
         }
         reader.readEndDocument();
         return FunctionResultMetadata.build("metadata", usage, createdAt);
