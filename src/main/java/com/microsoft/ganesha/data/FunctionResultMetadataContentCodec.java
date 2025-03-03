@@ -3,9 +3,6 @@ package com.microsoft.ganesha.data;
 import java.time.OffsetDateTime;
 import java.io.StringReader;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
 import org.bson.BsonType;
@@ -21,12 +18,12 @@ import java.util.Map;
 import java.util.HashMap;
 
 
+@SuppressWarnings("rawtypes")
 public class FunctionResultMetadataContentCodec implements Codec<FunctionResultMetadata> {
     @Override
     public void encode(BsonWriter writer, FunctionResultMetadata value, EncoderContext encoderContext) {
         CompletionsUsage usage = null;
-
-        writer.writeStartDocument();
+        
         writer.writeString("createdAt", value.getCreatedAt().toString());
         if (value.getUsage() != null) {
             usage = (CompletionsUsage)value.getUsage();
@@ -38,10 +35,10 @@ public class FunctionResultMetadataContentCodec implements Codec<FunctionResultM
     }
 
     @Override
-    public FunctionResultMetadata<?> decode(BsonReader reader, DecoderContext decoderContext) {
+    public FunctionResultMetadata decode(BsonReader reader, DecoderContext decoderContext) {
         reader.readStartDocument();
         OffsetDateTime createdAt = OffsetDateTime.parse(reader.readString("createdAt"));        
-        CompletionsUsage usage = null;        
+        CompletionsUsage usage = null;
         if (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             int completionTokens = reader.readInt32("completionTokens");
             int promptTokens = reader.readInt32("promptTokens");

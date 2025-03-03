@@ -32,64 +32,56 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
     public void encode(BsonWriter writer, OpenAIChatMessageContent value, EncoderContext encoderContext) {
         writer.writeStartDocument();
 
-        if (value.getMetadata() != null && (value.getMetadata().getCreatedAt() != null || value.getMetadata().getUsage() != null)) {
-            FunctionResultMetadata<?> metadata = null;
-            CompletionsUsage usage = null;
-            OffsetDateTime createdAt = null;
-
-            writer.writeStartArray("metadata");            
-            if (value.getMetadata().getCreatedAt() != null){                
-                createdAt = (OffsetDateTime)value.getMetadata().getCreatedAt();                
-            }                
-            if (value.getMetadata().getUsage() != null){
-                usage = (CompletionsUsage)value.getMetadata().getUsage();
-            }            
-            metadata = FunctionResultMetadata.build("metadata", usage, createdAt);
-            functionResultMetadataCodec.encode(writer, metadata, encoderContext);
-            writer.writeEndArray();
-        }
         writer.writeString("authorRole", value.getAuthorRole().toString());
         writer.writeString("content", value.getContent() != null ? value.getContent() : "");
         writer.writeString("encoding", value.getEncoding().toString());
+        
         if (value.getToolCall() != null && value.getToolCall().size() > 0) {
             writer.writeStartArray("toolCall");
             functionToolCallCodec.encode(writer, (OpenAIFunctionToolCall) value.getToolCall().get(0), encoderContext);
             writer.writeEndArray();
         }
 
+        if (value.getMetadata() != null && (value.getMetadata().getCreatedAt() != null || value.getMetadata().getUsage() != null)) {
+            functionResultMetadataCodec.encode(writer, value.getMetadata(), encoderContext);
+        }
+
         writer.writeEndDocument();
     }
 
     @Override
-    public OpenAIChatMessageContent<?> decode(BsonReader reader, DecoderContext decoderContext) {
+    public OpenAIChatMessageContent decode(BsonReader reader, DecoderContext decoderContext) {
         reader.readStartDocument();
         AuthorRole role = AuthorRole.valueOf(reader.readString("authorRole").toUpperCase());
         String content = reader.readString("content");
         Charset encoding = Charset.forName(reader.readString("encoding"));
-        OffsetDateTime createdAt = OffsetDateTime.parse(reader.readString("createdAt"));
         
-        Object usageObj = (Object)reader.readString("usage");
-        CompletionsUsage usage = (CompletionsUsage) usageObj;
-                     
-        FunctionResultMetadata<?> metadata = FunctionResultMetadata.build(content, usage, createdAt);
-
         
         List<OpenAIFunctionToolCall> toolCalls = new ArrayList<OpenAIFunctionToolCall>();
+        List<FunctionResultMetadata> metadata = new ArrayList<FunctionResultMetadata>();
 
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            if (reader.readName().equals("toolCall")) {
+            var name = reader.readName();
+            if (name.equals("toolCall")) {
                 BsonArray tCalls = bsonArrayCodec.decode(reader, decoderContext);
                 for (BsonValue tc : tCalls) {
                     BsonDocumentReader toolReader = new BsonDocumentReader(tc.asDocument());
                     OpenAIFunctionToolCall functionToolCall = functionToolCallCodec.decode(toolReader, decoderContext);
                     toolCalls.add(functionToolCall);
                 }
+            } else if (name.equals("metadata")) {
+                BsonArray mData = bsonArrayCodec.decode(reader, decoderContext);
+                for (BsonValue md : mData) {
+                    BsonDocumentReader metaReader = new BsonDocumentReader(md.asDocument());
+                    FunctionResultMetadata functionResultMetadata = functionResultMetadataCodec.decode(metaReader, decoderContext);
+                    metadata.add(functionResultMetadata);
+                }
             } else {
                 reader.skipValue();
             }
         }
         reader.readEndDocument();
-        return new OpenAIChatMessageContent<>(role, content, null, null, encoding, metadata, toolCalls);
+        return new OpenAIChatMessageContent<>(role, content, content, null, encoding, null, toolCalls);
     }
 
     @Override
