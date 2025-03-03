@@ -81,7 +81,7 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
             }
         }
         reader.readEndDocument();
-        return new OpenAIChatMessageContent<>(role, content, content, null, encoding, null, toolCalls);
+        return new OpenAIChatMessageContent<>(role, content, content, null, encoding, (metadata != null && !metadata.isEmpty()) ? metadata.get(0) : null, toolCalls);
     }
 
     @Override
