@@ -54,6 +54,7 @@ public class Conversation {
                 });
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Conversation(Document document) {
         this.conversationId = UUID.fromString(document.getString("conversationId"));
         var messages = document.getList("chatHistory", Document.class);
@@ -67,7 +68,7 @@ public class Conversation {
                         case "SYSTEM":
                             chatHistory.addSystemMessage(m.getString("content"));
                             break;
-                        case "ASSISTANT":                            
+                        case "ASSISTANT":
                             var toolCallsDocuments = m.getList("toolCall", Document.class);
                             if (toolCallsDocuments == null) {
                                 toolCallsDocuments = List.of();

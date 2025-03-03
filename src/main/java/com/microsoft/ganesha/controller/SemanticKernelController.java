@@ -16,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
-import com.microsoft.ganesha.models.DisplayChatMessage;
 import com.microsoft.ganesha.models.MemberIdRequest;
 import com.microsoft.ganesha.models.MulitEntityRequest;
 import com.microsoft.ganesha.models.SimplePromptRequest;
@@ -49,7 +48,7 @@ public class SemanticKernelController {
 
             // persist this ChatHistory object to MongoDB
             _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
-            
+
             return response;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -122,7 +121,8 @@ public class SemanticKernelController {
             _mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                ChatHistory reason = _kernel.GetReasons(conversation.getChatHistory().getMessages().get(0).getContent());
+                ChatHistory reason = _kernel
+                        .GetReasons(conversation.getChatHistory().getMessages().get(0).getContent());
                 conversation.setChatHistory(reason);
             } else {
                 var chatHistory = _kernel.Converse(conversation.getChatHistory());
