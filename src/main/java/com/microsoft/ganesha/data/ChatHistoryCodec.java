@@ -63,11 +63,9 @@ public class ChatHistoryCodec implements Codec<ChatHistory> {
                     chatHistory.addSystemMessage(m.getString("content").getValue());
                     break;
                 case "ASSISTANT":
+                case "TOOL":
                     var aiMsg = openAIChatMessageContentCodec.decode(new BsonDocumentReader(m), decoderContext);
                     chatHistory.addMessage(aiMsg);
-                    break;
-                case "TOOL":
-                    chatHistory.addMessage(AuthorRole.TOOL, m.getString("content").getValue());
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown author role: " + m.getString("authorRole"));

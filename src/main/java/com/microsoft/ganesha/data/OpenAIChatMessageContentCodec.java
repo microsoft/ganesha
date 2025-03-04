@@ -1,7 +1,5 @@
 package com.microsoft.ganesha.data;
 
-import java.time.OffsetDateTime;
-
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +8,6 @@ import org.bson.*;
 import org.bson.codecs.*;
 import org.bson.codecs.configuration.CodecRegistry;
 
-import com.azure.ai.openai.models.CompletionsUsage;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatMessageContent;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIFunctionToolCall;
 import com.microsoft.semantickernel.orchestration.FunctionResultMetadata;
@@ -28,13 +25,14 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
         this.functionResultMetadataCodec = registry.get(FunctionResultMetadata.class);
     }
 
+    @SuppressWarnings("null")
     @Override
     public void encode(BsonWriter writer, OpenAIChatMessageContent value, EncoderContext encoderContext) {
         writer.writeStartDocument();
 
         writer.writeString("authorRole", value.getAuthorRole().toString());
         writer.writeString("content", value.getContent() != null ? value.getContent() : "");
-        writer.writeString("encoding", value.getEncoding().toString());
+        writer.writeString("encoding", value.getEncoding() != null ? value.getEncoding().toString() : "");
         
         if (value.getToolCall() != null && value.getToolCall().size() > 0) {
             writer.writeStartArray("toolCall");
@@ -42,7 +40,7 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
             writer.writeEndArray();
         }
 
-        if (value.getMetadata() != null && (value.getMetadata().getCreatedAt() != null || value.getMetadata().getUsage() != null)) {
+        if (value.getMetadata() != null && (value.getMetadata().getCreatedAt() != null || value.getMetadata().getUsage() != null || value.getMetadata().getId() != null)) {
             functionResultMetadataCodec.encode(writer, value.getMetadata(), encoderContext);
         }
 
@@ -61,23 +59,26 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
         List<FunctionResultMetadata> metadata = new ArrayList<FunctionResultMetadata>();
 
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            var name = reader.readName();
-            if (name.equals("toolCall")) {
+            switch (reader.readName()) {
+            case "toolCall":
                 BsonArray tCalls = bsonArrayCodec.decode(reader, decoderContext);
                 for (BsonValue tc : tCalls) {
                     BsonDocumentReader toolReader = new BsonDocumentReader(tc.asDocument());
                     OpenAIFunctionToolCall functionToolCall = functionToolCallCodec.decode(toolReader, decoderContext);
                     toolCalls.add(functionToolCall);
                 }
-            } else if (name.equals("metadata")) {
+                break;
+            case "metadata":
                 BsonArray mData = bsonArrayCodec.decode(reader, decoderContext);
                 for (BsonValue md : mData) {
                     BsonDocumentReader metaReader = new BsonDocumentReader(md.asDocument());
                     FunctionResultMetadata functionResultMetadata = functionResultMetadataCodec.decode(metaReader, decoderContext);
                     metadata.add(functionResultMetadata);
                 }
-            } else {
+                break;
+            default:
                 reader.skipValue();
+                break;
             }
         }
         reader.readEndDocument();

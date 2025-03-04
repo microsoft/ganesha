@@ -13,17 +13,21 @@ import com.azure.ai.openai.models.CompletionsUsage;
 import com.azure.json.JsonReader;
 import com.azure.json.JsonOptions;
 import com.azure.json.JsonProviders;
-import java.util.Map;
-import java.util.HashMap;
 
 @SuppressWarnings("rawtypes")
 public class FunctionResultMetadataContentCodec implements Codec<FunctionResultMetadata> {
+    @SuppressWarnings("null")
     @Override
     public void encode(BsonWriter writer, FunctionResultMetadata value, EncoderContext encoderContext) {
         CompletionsUsage usage = null;
         writer.writeStartArray("metadata");
         writer.writeStartDocument();
-        writer.writeString("createdAt", value.getCreatedAt().toString());
+        if (value.getCreatedAt() != null) {
+            writer.writeString("createdAt", value.getCreatedAt().toString());
+        }
+        if (value.getId() != null) {
+            writer.writeString("id", value.getId());
+        }
         if (value.getUsage() != null) {
             usage = (CompletionsUsage) value.getUsage();
             writer.writeInt32("completionTokens", usage.getCompletionTokens());
@@ -37,24 +41,38 @@ public class FunctionResultMetadataContentCodec implements Codec<FunctionResultM
     @Override
     public FunctionResultMetadata decode(BsonReader reader, DecoderContext decoderContext) {
         reader.readStartDocument();
-        OffsetDateTime createdAt = OffsetDateTime.parse(reader.readString("createdAt"));
         CompletionsUsage usage = null;
+        OffsetDateTime createdAt = null;
+        String id = "";
         int completionTokens = 0;
         int promptTokens = 0;
         int totalTokens = 0;
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-            var name = reader.readName();
-            if (name.equals("completionTokens")) {
-                completionTokens = reader.readInt32();
-            } else if (name.equals("promptTokens")) {
-                promptTokens = reader.readInt32();
-            } else if (name.equals("totalTokens")) {
-                totalTokens = reader.readInt32();
+            switch(reader.readName()) {
+                case "completionTokens":
+                    completionTokens = reader.readInt32();
+                    break;
+                case "promptTokens":
+                    promptTokens = reader.readInt32();
+                    break;
+                case "totalTokens":
+                    totalTokens = reader.readInt32();
+                    break;
+                case "createdAt":
+                    createdAt = OffsetDateTime.parse(reader.readString());
+                    break;
+                case "id":
+                    id = reader.readString();
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
             }
         }
+        
         reader.readEndDocument();
 
-        String json = String.format("{\"completionTokens\": %d, \"promptTokens\": %d, \"totalTokens\": %d}",
+        String json = String.format("{\"completion_tokens\": %d, \"prompt_tokens\": %d, \"total_tokens\": %d}",
                 completionTokens, promptTokens, totalTokens);
         JsonReader jsonReader = null;
         try {
@@ -63,9 +81,7 @@ public class FunctionResultMetadataContentCodec implements Codec<FunctionResultM
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Map<String, Object> result = new HashMap<>();
-        result.put("usage", usage);
-        return FunctionResultMetadata.build("metadata", usage, createdAt);
+        return FunctionResultMetadata.build(id, usage, createdAt);
     }
 
     @Override
