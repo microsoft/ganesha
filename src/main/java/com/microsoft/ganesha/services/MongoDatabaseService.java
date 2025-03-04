@@ -1,12 +1,8 @@
 package com.microsoft.ganesha.services;
 
 import com.microsoft.ganesha.config.AppConfig;
-import com.microsoft.ganesha.data.ChatMessageTextContentCodec;
-import com.microsoft.ganesha.data.OpenAIChatMessageContentCodec;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
-import com.microsoft.semantickernel.services.chatcompletion.message.ChatMessageTextContent;
-import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -18,19 +14,15 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bson.Document;
-import org.bson.codecs.IntegerCodec;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.configuration.CodecRegistry;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
 @Scope("singleton")
 public class MongoDatabaseService implements MongoService {
-   
-    
+
     private final MongoClient mongoClient;
-    private final AppConfig config;    
+    private final AppConfig config;
 
     public MongoDatabaseService(MongoClient mongoClient, AppConfig config) {
         this.mongoClient = mongoClient;
@@ -40,27 +32,18 @@ public class MongoDatabaseService implements MongoService {
     @Override
     public Conversation GetConversation(UUID conversationId) throws Exception {
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
-        Document document = collection.find(Filters.eq("conversationId", conversationId.toString())).first();
-
-        if (document != null) {
-            // Convert the document to a Conversation object
-            return new Conversation(document);
-        } else {
-            return null;
-        }
+        MongoCollection<Conversation> collection = database.getCollection(config.getAzureCosmosCollection(),
+                Conversation.class);
+        return collection.find(Filters.eq("conversationId", conversationId.toString())).first();
     }
 
     @Override
-    public void UpsertConversation(Conversation conversation) throws Exception {        
+    public void UpsertConversation(Conversation conversation) throws Exception {
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
-        MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
+        MongoCollection<Conversation> collection = database.getCollection(config.getAzureCosmosCollection(),
+                Conversation.class);
 
-        Document document = new Document("conversationId", conversation.getConversationId().toString())
-                .append("chatHistory",
-                        conversation.getChatHistory());
-
-        collection.replaceOne(Filters.eq("conversationId", conversation.getConversationId().toString()), document,
+        collection.replaceOne(Filters.eq("conversationId", conversation.getConversationId().toString()), conversation,
                 new ReplaceOptions().upsert(true));
     }
 
@@ -76,7 +59,8 @@ public class MongoDatabaseService implements MongoService {
         MongoDatabase database = mongoClient.getDatabase(config.getAzureCosmosDatabase());
         MongoCollection<Document> collection = database.getCollection(config.getAzureCosmosCollection());
 
-        List<Conversation> conversations = collection.find().map(document -> new Conversation(document)).into(new ArrayList<>());
+        List<Conversation> conversations = collection.find().map(document -> new Conversation(document))
+                .into(new ArrayList<>());
         return conversations;
     }
 }

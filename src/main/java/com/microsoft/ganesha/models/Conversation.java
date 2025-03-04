@@ -1,14 +1,15 @@
 package com.microsoft.ganesha.models;
 
-import java.util.ArrayList;
+import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import com.microsoft.ganesha.data.OpenAIFunctionToolCallCodec;
+import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatMessageContent;
 import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
-import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 
+import org.bson.BsonDocumentReader;
 import org.bson.Document;
 
 public class Conversation {
@@ -53,10 +54,11 @@ public class Conversation {
                 });
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Conversation(Document document) {
         this.conversationId = UUID.fromString(document.getString("conversationId"));
         var messages = document.getList("chatHistory", Document.class);
-        this.chatHistory = new ChatHistory();  
+        this.chatHistory = new ChatHistory();
         messages.stream()
                 .forEach(m -> {
                     switch (m.getString("authorRole").toUpperCase()) {
@@ -67,12 +69,20 @@ public class Conversation {
                             chatHistory.addSystemMessage(m.getString("content"));
                             break;
                         case "ASSISTANT":
-                            // missing tool call information
-                            // try using toJSON or BsonSerializer to deserialize the BsonDocument into OpenAIChatMessageContent
-                            chatHistory.addAssistantMessage(m.getString("content"));
+                            var toolCallsDocuments = m.getList("toolCall", Document.class);
+                            if (toolCallsDocuments == null) {
+                                toolCallsDocuments = List.of();
+                            }
+                            var toolCalls = toolCallsDocuments.stream()
+                                    .map(d -> new OpenAIFunctionToolCallCodec()
+                                            .decode(new BsonDocumentReader(d.toBsonDocument()), null))
+                                    .toList();
+                            chatHistory.addMessage(new OpenAIChatMessageContent(AuthorRole.ASSISTANT,
+                                    m.getString("content"), null, null, Charset.forName(m.getString("encoding")), null,
+                                    toolCalls));
                             break;
                         case "TOOL":
-                            chatHistory.addMessage(AuthorRole.TOOL, m.getString("content"));                            
+                            chatHistory.addMessage(AuthorRole.TOOL, m.getString("content"));
                             break;
                         default:
                             throw new IllegalArgumentException("Unknown author role: " + m.getString("authorRole"));

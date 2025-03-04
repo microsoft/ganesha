@@ -5,7 +5,9 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.springframework.context.annotation.Configuration;
 
 import com.microsoft.ganesha.config.AppConfig;
+import com.microsoft.ganesha.data.ChatMessageTextContentCodec;
 import com.microsoft.ganesha.data.CustomCodecProvider;
+import com.microsoft.ganesha.data.OpenAIFunctionToolCallCodec;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClients;
@@ -19,11 +21,13 @@ public class MongoServiceFactory {
         this.config = config;
     }
 
-    
     public MongoService create() {
         CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
-                    CodecRegistries.fromProviders(new CustomCodecProvider()),
-                    MongoClientSettings.getDefaultCodecRegistry());
+                CodecRegistries.fromCodecs(
+                        new ChatMessageTextContentCodec(),
+                        new OpenAIFunctionToolCallCodec()),
+                CodecRegistries.fromProviders(new CustomCodecProvider()),
+                MongoClientSettings.getDefaultCodecRegistry());
         MongoClientSettings settings = MongoClientSettings.builder()
                 .codecRegistry(codecRegistry)
                 .build();
