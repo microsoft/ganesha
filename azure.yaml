@@ -11,3 +11,10 @@ services:
     docker:
       path: ./Dockerfile
       context: ./
+  pythontestapi:
+    project: ./python
+    language: python
+    host: containerapp
+    docker:
+      path: Dockerfile
+      context: ./

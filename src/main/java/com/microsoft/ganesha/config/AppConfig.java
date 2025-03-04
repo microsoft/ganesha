@@ -43,6 +43,9 @@ public class AppConfig {
     @Value("${USE_OPENAPI_PLUGIN:false}")
     private String useOpenAPIPlugin;
 
+    @Value("${TEST_OPENAPI_SERVER_URL:http://127.0.0.1:8000}")
+    private String pythonTestOpenAPIServerUrl;
+
     public String getAzureClientKey() {
         return azureClientKey;
     }
@@ -91,5 +94,9 @@ public class AppConfig {
         if (useOpenAPIPlugin.equals("true"))
             return true;
         return false;
+    }
+
+    public String GetPythonTestOpenAPIServerUrl() {
+       return pythonTestOpenAPIServerUrl;
     }
 }

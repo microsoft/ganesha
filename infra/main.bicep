@@ -13,6 +13,7 @@ param location string
 param principalId string = ''
 
 param serviceName string = 'api'
+param pythonTestService string = 'pythontestapi'
 
 // @description('The MongoDB username to use for the cluster')
 // param mongodbUsername string = 'Admin001'
@@ -287,12 +288,72 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
             secretRef: 'app-insights-connection-string' 
           }
+          {
+            name:'USE_OPENAPI_PLUGIN'
+            value: '"true"'
+          }
+          {
+            name:'TEST_OPENAPI_SERVER_URL'
+            value:'https://${pythonContainerAppsApp.outputs.fqdn}'
+          }
           // ** Using in-memory storage. Uncomment to enable mongoDB service.
           // {
           //   name: 'AZURE_COSMOS_CONN_STR'
           //   secretRef: 'azure-cosmos-connection-string'
           // }
         ]
+      }
+    ]
+  }
+}
+
+module pythonContainerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
+  name: 'py-con-apps-app'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: 'py-con-app-${resourceToken}'
+    environmentResourceId: containerAppsEnvironment.outputs.resourceId
+    location: location
+    tags: union(tags, { 'azd-service-name': pythonTestService })
+    ingressTargetPort: 80
+    ingressExternal: true
+    ingressTransport: 'auto'
+    stickySessionsAffinity: 'sticky'
+    scaleMaxReplicas: 1
+    scaleMinReplicas: 1
+    corsPolicy: {
+      allowCredentials: true
+      allowedOrigins: [
+        '*'
+      ]
+    }
+    managedIdentities: {
+      systemAssigned: false
+      userAssignedResourceIds: [
+        managedIdentity.outputs.resourceId
+      ]
+    }
+    secrets: {
+      secureList: [
+        {
+          name: 'user-assigned-managed-identity-client-id'
+          value: managedIdentity.outputs.clientId
+        }
+        {
+          name: 'azure-client-key'
+          value: cognitive.outputs.key
+        }       
+      ]
+    }
+    containers: [
+      {
+        image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        name: 'python-service'
+        resources: {
+          cpu: '0.25'
+          memory: '.5Gi'
+        }
+        env: []
       }
     ]
   }
