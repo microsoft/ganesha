@@ -9,6 +9,7 @@ import com.microsoft.ganesha.data.ChatMessageTextContentCodec;
 import com.microsoft.ganesha.data.CustomCodecProvider;
 import com.microsoft.ganesha.data.OpenAIFunctionToolCallCodec;
 import com.microsoft.ganesha.interfaces.MongoService;
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClients;
 
@@ -28,8 +29,10 @@ public class MongoServiceFactory {
                         new OpenAIFunctionToolCallCodec()),
                 CodecRegistries.fromProviders(new CustomCodecProvider()),
                 MongoClientSettings.getDefaultCodecRegistry());
+        ConnectionString connectionString = new ConnectionString(config.getAzureCosmosConnString());
         MongoClientSettings settings = MongoClientSettings.builder()
                 .codecRegistry(codecRegistry)
+                .applyConnectionString(connectionString)
                 .build();
         return new MongoDatabaseService(MongoClients.create(settings), config);
     }
