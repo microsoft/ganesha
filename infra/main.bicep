@@ -266,7 +266,15 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           }
           {
             name: 'AZURE_COSMOS_CONN_STR'
-            value: ''
+            value: 'mongodb+srv://skraymo:1234qwer!@ganeshamongo.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
+          }
+          {
+            name: 'AZURE_COSMOS_DATABASE'
+            value: 'ganesha'
+          }
+          {
+            name: 'AZURE_COSMOS_COLLECTION'
+            value: 'chatHistory'
           }
           {
             name: 'AZURE_CLIENT_KEY'
@@ -290,7 +298,7 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           }
           {
             name:'USE_OPENAPI_PLUGIN'
-            value: '"true"'
+            value: 'true'
           }
           {
             name:'TEST_OPENAPI_SERVER_URL'
