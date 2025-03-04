@@ -1,7 +1,6 @@
 package com.microsoft.ganesha.controller;
 
 import java.util.List;
-import java.util.ListIterator;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -14,22 +13,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.azure.core.annotation.Delete;
-import com.azure.core.annotation.Get;
-import com.azure.core.annotation.PathParam;
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
-import com.microsoft.ganesha.models.DisplayChatMessage;
 import com.microsoft.ganesha.models.MemberIdRequest;
 import com.microsoft.ganesha.models.MulitEntityRequest;
 import com.microsoft.ganesha.models.SimplePromptRequest;
 import com.microsoft.ganesha.semantickernel.SemanticKernel;
 import com.microsoft.ganesha.services.MongoServiceFactory;
 import com.microsoft.semantickernel.services.ServiceNotFoundException;
-import com.microsoft.semantickernel.services.chatcompletion.AuthorRole;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
-import com.microsoft.semantickernel.services.chatcompletion.ChatMessageContent;
 
 @RestController
 public class SemanticKernelController {
@@ -55,7 +48,7 @@ public class SemanticKernelController {
 
             // persist this ChatHistory object to MongoDB
             _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
-            
+
             return response;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -128,7 +121,8 @@ public class SemanticKernelController {
             _mongoService.UpsertConversation(conversation);
 
             if (conversationDoesNotExist) {
-                ChatHistory reason = _kernel.GetReasons(conversation.getChatHistory().getMessages().get(0).getContent());
+                ChatHistory reason = _kernel
+                        .GetReasons(conversation.getChatHistory().getMessages().get(0).getContent());
                 conversation.setChatHistory(reason);
             } else {
                 var chatHistory = _kernel.Converse(conversation.getChatHistory());
