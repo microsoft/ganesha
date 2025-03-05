@@ -266,15 +266,16 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           }
           {
             name: 'AZURE_COSMOS_CONN_STR'
-            value: 'mongodb+srv://skraymo:1234qwer!@ganeshamongo.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
+            //Mongo connection string
+            value: ''
           }
           {
             name: 'AZURE_COSMOS_DATABASE'
-            value: 'ganesha'
+            value: ''
           }
           {
             name: 'AZURE_COSMOS_COLLECTION'
-            value: 'chatHistory'
+            value: ''
           }
           {
             name: 'AZURE_CLIENT_KEY'
@@ -298,7 +299,8 @@ module containerAppsApp 'br/public:avm/res/app/container-app:0.9.0' = {
           }
           {
             name:'USE_OPENAPI_PLUGIN'
-            value: 'true'
+            //Set the value to 'true' to use the python app running opean api plugin
+            value: ''
           }
           {
             name:'TEST_OPENAPI_SERVER_URL'
