@@ -3,9 +3,6 @@ info:
   title: RX Claims API
   description: API for serving RX Claims
   version: 1.0.0
-servers:
-  - url: http://127.0.0.1:8000
-    description: Local development server
 paths:
   /rxclaims/member/{member_id}:
     get:

@@ -143,6 +143,7 @@ public class SemanticKernel {
                         KernelPlugin rxClaimPlugin = SemanticKernelOpenAPIImporter
                         .builder()
                         .withPluginName("rxclaim")
+                        .withServer(config.GetPythonTestOpenAPIServerUrl())
                         .withSchema(yaml)
                         .build();
                         builder.withPlugin(rxClaimPlugin);
