@@ -37,7 +37,7 @@ public class OpenAIChatMessageContentCodec implements Codec<OpenAIChatMessageCon
         if (value.getToolCall() != null && value.getToolCall().size() > 0) {
             writer.writeStartArray("toolCall");
             for (var toolCall : value.getToolCall()) {                
-                functionToolCallCodec.encode(writer, (OpenAIFunctionToolCall) value.getToolCall().get(0), encoderContext);                
+                functionToolCallCodec.encode(writer, (OpenAIFunctionToolCall) toolCall, encoderContext);                
             }
             writer.writeEndArray();
         }
