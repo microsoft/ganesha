@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.azure.core.annotation.PathParam;
+import com.azure.core.annotation.QueryParam;
 import com.microsoft.ganesha.exception.SemanticKernelException;
 import com.microsoft.ganesha.interfaces.MongoService;
 import com.microsoft.ganesha.models.Conversation;
@@ -40,14 +42,26 @@ public class SemanticKernelController {
         return _kernel.GetSKResult(prompt.getPrompt());
     }
 
-    @PostMapping("/predictReason")
-    ChatHistory predictReason(@RequestBody MemberIdRequest request)
-            throws SemanticKernelException, ServiceNotFoundException {
+    @GetMapping("/members/{memberId}/predictReason")
+    ChatHistory predictReason(@PathVariable String memberId,
+            @RequestParam(name = "conversationId", required = false, defaultValue = "") String conversationIdStr) {
         try {
-            var response = _kernel.GetReasons(request.getMemberId());
+            UUID conversationId = null;
+            if (!conversationIdStr.isEmpty()) {
+                try {
+                    conversationId = UUID.fromString(conversationIdStr);
+                } catch (IllegalArgumentException e) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid conversation ID format");
+                }
+            }
+
+            var response = _kernel.GetReasons(memberId);
 
             // persist this ChatHistory object to MongoDB
-            _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
+            if (conversationId != null)
+                _mongoService.UpsertConversation(new Conversation(conversationId, response));
+            else
+                _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
 
             return response;
         } catch (Exception e) {

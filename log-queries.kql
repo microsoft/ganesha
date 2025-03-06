@@ -1,0 +1,7 @@
+let memberId = "12345";
+let conversationId = "";
+requests
+// | where operation_Id == operation_Id
+| where timestamp between (ago(40d) .. now())
+| where name startswith strcat("GET /members/", memberId)
+| where isempty(conversationId) or name contains strcat("conversationId=", conversationId)
