@@ -43,7 +43,7 @@ public class SemanticKernelController {
     }
 
     @GetMapping("/members/{memberId}/predictReason")
-    ChatHistory predictReason(@PathVariable String memberId,
+    String predictReason(@PathVariable String memberId,
             @RequestParam(name = "conversationId", required = false, defaultValue = "") String conversationIdStr) {
         try {
             UUID conversationId = null;
@@ -55,15 +55,17 @@ public class SemanticKernelController {
                 }
             }
 
-            var response = _kernel.GetReasons(memberId);
+            ChatHistory response = new ChatHistory();
+            response =_kernel.GetReasons(memberId);
 
             // persist this ChatHistory object to MongoDB
             if (conversationId != null)
                 _mongoService.UpsertConversation(new Conversation(conversationId, response));
             else
                 _mongoService.UpsertConversation(new Conversation(UUID.randomUUID(), response));
+                
+            return response.getLastMessage().toString();
 
-            return response;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
